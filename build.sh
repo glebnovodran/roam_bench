@@ -8,6 +8,7 @@ BUILD_PATH=$PWD
 PROG_DIR=prog
 CORE_DIR=core
 DATA_DIR=data
+PINT_DIR=pint
 
 INC_DIR=inc
 SRC_DIR=src
@@ -94,7 +95,7 @@ if [ "$#" -gt 0 ]; then
 fi
 
 printf "$FMT_MAGENTA$FMT_BOLD""*-----------------------------------------* ""$FMT_OFF\n"
-printf " ""$FMT_BLUE_BG$FMT_B_YELLOW"" .: Building draw-walkthrough project :. ""$FMT_OFF\n"
+printf " ""$FMT_BLUE_BG$FMT_B_YELLOW"" .: Building roam_bench project :. ""$FMT_OFF\n"
 printf "$FMT_MAGENTA$FMT_BOLD""*-----------------------------------------* ""$FMT_OFF\n"
 
 if [ $WEB_BUILD -ne 0 ]; then
@@ -107,6 +108,10 @@ fi
 if [ ! -d $PROG_DIR ]; then
 	mkdir -p $PROG_DIR
 fi
+
+PINT_SRC_URL="https://raw.githubusercontent.com/glebnovodran/proto-plop/main/pint/src"
+PINT_SRCS="pint.hpp pint.cpp"
+
 
 CORE_SRC_URL="https://raw.githubusercontent.com/schaban/crosscore_dev/main/src"
 CORE_SRCS="crosscore.hpp crosscore.cpp demo.hpp demo.cpp draw.hpp oglsys.hpp oglsys.cpp oglsys.inc scene.hpp scene.cpp smprig.hpp smprig.cpp smpchar.hpp smpchar.cpp draw_ogl.cpp main.cpp"
@@ -126,6 +131,21 @@ if [ -x "`command -v curl`" ]; then
 elif [ -x "`command -v wget`" ]; then
 	DL_MODE="WGET"
 	DL_CMD="wget -O"
+fi
+
+NEED_PINT=0
+if [ ! -d $PINT_DIR ]; then
+	mkdir -p $PINT_DIR
+	NEED_PINT=1
+else
+	for src in $PINT_SRCS; do
+		if [ $NEED_PINT -ne 1 ]; then
+			printf $PINT_DIR/$src
+			if [ ! -f $PINT_DIR/$src ]; then
+				NEED_PINT=1
+			fi
+		fi
+	done
 fi
 
 NEED_CORE=0
@@ -161,6 +181,16 @@ else
 			done
 		fi
 	fi
+fi
+
+if [ $NEED_PINT -ne 0 ]; then
+	printf "$FMT_B_RED""-> Downloading pint sources...""$FMT_OFF\n"
+	for src in $PINT_SRCS; do
+		if [ ! -f $PINT_DIR/$src ]; then
+			printf "$FMT_B_BLUE""     $src""$FMT_OFF\n"
+			$DL_CMD $PINT_DIR/$src $PINT_SRC_URL/$src
+		fi
+	done
 fi
 
 if [ $NEED_CORE -ne 0 ]; then
@@ -230,8 +260,8 @@ if [ $NEED_OGL_INC -ne 0 ]; then
 	done
 fi
 
-INCS="-I $CORE_DIR -I $INC_DIR "
-SRCS="`ls $SRC_DIR/*.cpp` `ls $CORE_DIR/*.cpp`"
+INCS="-I $CORE_DIR -I $INC_DIR -I $PINT_DIR"
+SRCS="`ls $SRC_DIR/*.cpp` `ls $CORE_DIR/*.cpp` `ls $PINT_DIR/*.cpp`"
 
 DEFS="-DX11"
 LIBS="-lX11"

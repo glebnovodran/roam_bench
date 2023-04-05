@@ -4,6 +4,7 @@ hou/**
 inc/**
 lib/**
 core/**
+pint/**
 prog/**
 data/simple_ogl/**
 run.sh
