@@ -1,0 +1,9 @@
+(defvar newActName "")
+(defvar newActDuration 0)
+(defvar wallTouchReset 1)
+(if (not check_act_timeout) (break))
+
+(defvar sel (lt (logand (glb_rng_next) 63) 15))
+(set newActName (if sel "run" "walk"))
+(set newActDuration (if sel 2 5))
+(set wallTouchReset (eq newActName "walk"))

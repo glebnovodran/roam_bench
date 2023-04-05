@@ -1,0 +1,8 @@
+(defvar newActName "")
+(defvar newActDuration 0)
+
+(if (not (check_act_timeout)) (break))
+(if (le (wallTouchDT) 0.1) (break))
+
+(set newActName "stand")
+(set newActDuration 2.0)

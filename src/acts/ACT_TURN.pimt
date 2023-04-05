@@ -1,0 +1,7 @@
+(defvar newActName "")
+(defvar newActDuration 0)
+
+(if (not (check_act_timeout)) (break))
+
+(set newActName "stand")
+(set newActDuration 1.0)
