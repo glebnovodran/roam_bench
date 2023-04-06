@@ -1,6 +1,7 @@
 (defvar newActName "")
 (defvar newActDuration 0)
-(defvar wallTouchReset 1)
+(defvar wallTouchReset 0)
+
 (if (not check_act_timeout) (break))
 
 (defvar sel (lt (logand (glb_rng_next) 63) 15))

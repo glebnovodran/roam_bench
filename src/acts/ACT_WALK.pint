@@ -1,5 +1,6 @@
 (defvar newActName "")
 (defvar newActDuration 0)
+(defvar wallTouchReset 0)
 
 (if (not (check_act_timeout)) (break))
 (if (logior (le (objTouchDT) 0.2) (le (wallTouchDT) 0.25)) (break))
