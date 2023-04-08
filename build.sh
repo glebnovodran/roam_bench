@@ -14,6 +14,7 @@ INC_DIR=inc
 SRC_DIR=src
 TMP_DIR=tmp
 
+ACTS_DIR=acts
 
 WEB_TMP_DIR=tmp/web
 
@@ -109,6 +110,12 @@ if [ ! -d $PROG_DIR ]; then
 	mkdir -p $PROG_DIR
 fi
 
+if [ ! -d $DATA_DIR/$ACTS_DIR ]; then
+	mkdir -p $DATA_DIR/$ACTS_DIR
+fi
+
+cp $SRC_DIR/$ACTS_DIR/*.pint $DATA_DIR/$ACTS_DIR
+
 PINT_SRC_URL="https://raw.githubusercontent.com/glebnovodran/proto-plop/main/pint/src"
 PINT_SRCS="pint.hpp pint.cpp"
 
@@ -140,7 +147,6 @@ if [ ! -d $PINT_DIR ]; then
 else
 	for src in $PINT_SRCS; do
 		if [ $NEED_PINT -ne 1 ]; then
-			printf $PINT_DIR/$src
 			if [ ! -f $PINT_DIR/$src ]; then
 				NEED_PINT=1
 			fi
