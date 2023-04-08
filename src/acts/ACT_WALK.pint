@@ -5,7 +5,7 @@
 (if (not (check_act_timeout)) (break))
 (if (logior (le (objTouchDT) 0.2) (le (wallTouchDT) 0.25)) (break))
 
-(defvar sel0 (lt (logand (glb_rng_next) 63) 31))
+(defvar sel0 (lt (logand (glb_rng_next) 0x3F) 0x1F))
 (defvar selTurn (lt (logand (glb_rng_next) 1)))
 (defvar t (math_fit((glb_rng_f01) 0.0 1.0 0.5 2.0)))
 
