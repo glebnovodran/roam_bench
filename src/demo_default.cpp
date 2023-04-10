@@ -3,6 +3,7 @@
 #include "demo.hpp"
 #include "smprig.hpp"
 #include "smpchar.hpp"
+#include "pint.hpp"
 
 DEMO_PROG_BEGIN
 
@@ -16,7 +17,75 @@ enum class RoamProgKind {
 	PLOP
 };
 
+enum class BindIdx {
+	EXECONTEXT = 0,
+	FUNCLIB = 1
+};
+
 static RoamProgKind s_roamProgKind = RoamProgKind::NATIVE;
+
+static struct CharPintProg {
+	const char* pActName;
+	const char* pProgName;
+	char* pSrc;
+	size_t srcSize;
+} s_chrProgs[] = {
+	{ "ACT_STAND", "ACT_STAND", nullptr, 0 },
+	{ "ACT_TURN_L", "ACT_TURN", nullptr, 0 },
+	{ "ACT_TURN_R", "ACT_TURN", nullptr, 0 },
+	{ "ACT_WALK", "ACT_WALK", nullptr, 0 },
+	{ "ACT_RETREAT", "ACT_RETREAT",nullptr, 0 },
+	{ "ACT_RUN", "ACT_RUN", nullptr, 0 }
+};
+
+static char* load_prog(const char* pName, size_t& srcSize) {
+	char* pProg = nullptr;
+	cxResourceManager* pRsrcMgr = Scene::get_rsrc_mgr();
+	bool res = false;
+	const char* pDataPath = pRsrcMgr ? pRsrcMgr->get_data_path() : nullptr;
+	if (pName) {
+		char path[256];
+		char* pSrcPath = path;
+		size_t bufSize = sizeof(path);
+		size_t pathSize = (pDataPath ? nxCore::str_len(pDataPath) : 1) + 6 + nxCore::str_len(pName) + 5 + 1;
+		if (bufSize < pathSize) {
+			pSrcPath = reinterpret_cast<char*>(nxCore::mem_alloc(pathSize, "chr_prog_path"));
+			bufSize = pathSize;
+		}
+
+		XD_SPRINTF(XD_SPRINTF_BUF(pSrcPath, bufSize), "%s/%s/%s.pint", pDataPath ? pDataPath : ".", "acts", pName);
+		srcSize = 0;
+		pProg = reinterpret_cast<char*>(nxCore::raw_bin_load(pSrcPath, &srcSize));
+		if (pSrcPath != path) {
+			nxCore::mem_free(pSrcPath);
+		}
+		res = true;
+	}
+	return pProg;
+}
+
+static void free_pint_progs() {
+	size_t nprogs = XD_ARY_LEN(s_chrProgs);
+	for (int i = 0; i < nprogs; ++i) {
+		char* pSrc = s_chrProgs[i].pSrc;
+		if (pSrc) {
+			nxCore::bin_unload(pSrc);
+			pSrc = nullptr;
+		}
+	}
+}
+
+static void load_pint_progs() {
+	size_t nprogs = XD_ARY_LEN(s_chrProgs);
+	for (int i = 0; i < nprogs; ++i) {
+		char* pProg = load_prog(s_chrProgs[i].pProgName, s_chrProgs[i].srcSize);
+		if (pProg) {
+			s_chrProgs[i].pSrc = pProg;
+		} else {
+			nxCore::dbg_msg("Couldn't load %s character program\n", s_chrProgs[i].pProgName);
+		}
+	}
+}
 
 static struct STAGE {
 	Pkg* pPkg;
@@ -37,6 +106,89 @@ static void init_stage() {
 	if (pPkg) {
 		Scene::for_all_pkg_models(pPkg, add_stg_obj, &s_stage);
 		SmpCharSys::set_collision(pPkg->find_collision("col"));
+	}
+}
+
+Pint::Value scn_rng_next(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+	Pint::Value res;
+	uint64_t rnd = Scene::glb_rng_next();
+	rnd &= 0xffffffff;
+	res.set_num(double(rnd));
+	return res;
+}
+static const Pint::FuncDef s_df_rng_next_desc = {
+	"glb_rng_next", scn_rng_next, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
+};
+
+Pint::Value scn_rng_01(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+	Pint::Value res;
+	float rnd = Scene::glb_rng_f01();
+	res.set_num(double(rnd));
+	return res;
+}
+static const Pint::FuncDef s_df_rng_01_desc = {
+	"glb_rng_01", scn_rng_01, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
+};
+
+Pint::Value ck_act_timeout(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+	Pint::Value res;
+	SmpChar* pChar = reinterpret_cast<SmpChar*>(ctx.get_local_binding());
+	bool isTimeOut = pChar->check_act_time_out();
+	res.set_num(isTimeOut);
+	return res;
+}
+
+static const Pint::FuncDef s_df_ck_act_timeout_desc = {
+	"check_act_timeout", ck_act_timeout, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
+};
+
+static int find_pint_prog(const char* pActName, CharPintProg* pProg) {
+	int idx = -1;
+	size_t nacts = XD_ARY_LEN(s_chrProgs);
+	for (int i = 0; i < nacts; ++i) {
+		if (nxCore::str_eq(pActName, s_chrProgs[i].pActName)) {
+			pProg = &s_chrProgs[i];
+			idx = i;
+			break;
+		}
+	}
+	return idx;
+}
+
+static void char_pint_roam_ctrl(SmpChar* pChar) {
+	if (!pChar) return;
+	double objTouchDT = pChar->get_obj_touch_duration_secs();
+	double wallTouchDT = pChar->get_wall_touch_duration_secs();
+	size_t nprogs = XD_ARY_LEN(s_chrProgs);
+
+	if (pChar->mAction < nprogs) {
+		const char* pSrc = s_chrProgs[pChar->mAction].pSrc;
+		size_t srcSize = s_chrProgs[pChar->mAction].srcSize;
+		Pint::ExecContext* pCtx = pChar->get_ptr_wk<Pint::ExecContext>(int(BindIdx::EXECONTEXT));
+		Pint::FuncLibrary* pFuncLib = pChar->get_ptr_wk<Pint::FuncLibrary>(int(BindIdx::FUNCLIB));
+		Pint::interp(pSrc, srcSize, pCtx, pFuncLib);
+		pCtx->print_vars();
+		Pint::Value* pNewActVal = pCtx->var_val(pCtx->find_var("newActName"));
+		const char* pNewActName = pNewActVal ? pNewActVal->val.pStr : "";
+		if (!nxCore::str_eq(pNewActName, "")) {
+			CharPintProg* pProg = nullptr;
+			int actId = find_pint_prog(pNewActName, pProg);
+			if (actId >= 0) {
+				double newActDuration = 0.0;
+				Pint::Value* pDurationVal = pCtx->var_val(pCtx->find_var("newActDuration"));
+				newActDuration = pDurationVal ? pDurationVal->val.num : 0.0;
+				if (nxCore::str_eq(pNewActName, "TURN_L") || nxCore::str_eq(pNewActName, "TURN_R")) {
+					nxCore::dbg_msg("Turning\n");
+				}
+				pChar->change_act(actId, newActDuration);
+			}
+		}
+
+		Pint::Value* pWTResetVal = pCtx->var_val(pCtx->find_var("wallTouchReset"));
+		bool wallTouchReset = pWTResetVal ? pWTResetVal->val.num == 1.0 : false;
+		if (wallTouchReset) {
+			pChar->reset_wall_touch();
+		}
 	}
 }
 
@@ -93,6 +245,10 @@ static void init_chars() {
 	descr.reset();
 	bool disableSl = nxApp::get_bool_opt("scl_off", false);
 
+	SmpChar::CtrlFunc ctrlFunc = char_roam_ctrl;
+	if (s_roamProgKind == RoamProgKind::PINT) {
+		ctrlFunc = char_pint_roam_ctrl;
+	}
 	float x = -5.57f;
 	for (int i = 0; i < 10; ++i) {
 		descr.variation = i;
@@ -105,7 +261,7 @@ static void init_chars() {
 				descr.scale = 1.0f;
 			}
 		}
-		ScnObj* pObj = SmpCharSys::add_f(descr, char_roam_ctrl);
+		ScnObj* pObj = SmpCharSys::add_f(descr, ctrlFunc);
 		pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
 		x += 0.7f;
 	}
@@ -124,7 +280,7 @@ static void init_chars() {
 				descr.scale = 1.04f;
 			}
 		}
-		ScnObj* pObj = SmpCharSys::add_m(descr, char_roam_ctrl);
+		ScnObj* pObj = SmpCharSys::add_m(descr, ctrlFunc);
 		if (pObj) {
 			pObj->set_world_quat_pos(q, pos);
 		}
@@ -141,9 +297,9 @@ static void init_chars() {
 			descr.scale = 1.0f;
 			descr.variation = 9 - (i >> 1);
 			if (i & 1) {
-				pObj = SmpCharSys::add_f(descr, char_roam_ctrl);
+				pObj = SmpCharSys::add_f(descr, ctrlFunc);
 			} else {
-				pObj = SmpCharSys::add_m(descr, char_roam_ctrl);
+				pObj = SmpCharSys::add_m(descr, ctrlFunc);
 			}
 			if (pObj) {
 				pObj->set_world_quat_pos(q, pos);
@@ -157,6 +313,7 @@ static void init_chars() {
 	}
 }
 
+static Pint::FuncLibrary* s_pFuncLib = nullptr;
 
 static void init() {
 	s_roamProgKind = RoamProgKind::NATIVE;
@@ -172,6 +329,11 @@ static void init() {
 	//Scene::alloc_global_heap(1024 * 1024 * 2);
 	Scene::alloc_local_heaps(1024 * 1024 * 2);
 	SmpCharSys::init();
+
+	if (s_roamProgKind == RoamProgKind::PINT) {
+		load_pint_progs();
+	}
+
 	init_chars();
 	init_stage();
 	s_execStopWatch.alloc(120);
@@ -186,6 +348,12 @@ static void init() {
 	nxCore::dbg_msg("roam prog kind: ");
 	if (s_roamProgKind == RoamProgKind::PINT) {
 		nxCore::dbg_msg("PINT");
+		s_pFuncLib = nxCore::tMem<Pint::FuncLibrary>::alloc();
+		s_pFuncLib->init();
+
+		s_pFuncLib->register_func(s_df_rng_next_desc);
+		s_pFuncLib->register_func(s_df_rng_01_desc);
+		s_pFuncLib->register_func(s_df_ck_act_timeout_desc);
 	} else if (s_roamProgKind == RoamProgKind::PLOP) {
 		nxCore::dbg_msg("PLOP");
 	} else {
@@ -317,6 +485,10 @@ static bool chr_exec_init_pint_func(ScnObj* pObj, void* pWkMem) {
 	SmpChar* pChr = SmpCharSys::char_from_obj(pObj);
 	if (pChr) {
 		//
+		Pint::ExecContext* pCtx = nxCore::tMem<Pint::ExecContext>::alloc();
+		pCtx->init(pChr);
+		pChr->set_ptr_wk<Pint::ExecContext>(int(BindIdx::EXECONTEXT), pCtx);
+		pChr->set_ptr_wk<Pint::FuncLibrary>(int(BindIdx::FUNCLIB), s_pFuncLib);
 	}
 	return true;
 }
@@ -328,9 +500,12 @@ static void chr_exec_init() {
 }
 
 static bool chr_exec_reset_pint_func(ScnObj* pObj, void* pWkMem) {
+	using namespace Pint;
 	SmpChar* pChr = SmpCharSys::char_from_obj(pObj);
 	if (pChr) {
 		//
+		Pint::ExecContext* pCtx = pChr->get_ptr_wk<Pint::ExecContext>(int(BindIdx::EXECONTEXT));
+		nxCore::tMem<Pint::ExecContext>::free(pCtx);
 	}
 	return true;
 }
@@ -366,6 +541,16 @@ static void loop(void* pLoopCtx) {
 static void reset() {
 	SmpCharSys::reset();
 	s_execStopWatch.free();
+
+	if (s_roamProgKind == RoamProgKind::PINT) {
+		if (s_pFuncLib) {
+			s_pFuncLib->reset();
+			nxCore::tMem<Pint::FuncLibrary>::free(s_pFuncLib, 1);
+		}
+
+		free_pint_progs();
+	}
+
 }
 
 DEMO_REGISTER(default);
