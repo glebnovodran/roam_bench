@@ -164,6 +164,22 @@ static const Pint::FuncDef s_df_get_wall_touch_duration_secs_desc = {
 	"get_wall_touch_duration_secs", get_wall_touch_duration_secs, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
 };
 
+Pint::Value math_fit(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+	Pint::Value res;
+	double val = pArgs[0].val.num;
+	double oldMin = pArgs[1].val.num;
+	double oldMax = pArgs[2].val.num;
+	double newMin = pArgs[3].val.num;
+	double newMax = pArgs[4].val.num;
+	res.set_num(nxCalc::fit(val, oldMin, oldMax, newMin, newMax));
+	return res;
+}
+
+static const Pint::FuncDef s_df_math_fit_desc = {
+	"math_fit", math_fit, 5, Pint::Value::Type::NUM,
+	{Pint::Value::Type::NUM, Pint::Value::Type::NUM, Pint::Value::Type::NUM, Pint::Value::Type::NUM, Pint::Value::Type::NUM}
+};
+
 static int find_pint_prog(const char* pActName, CharPintProg* pProg) {
 	int idx = -1;
 	size_t nacts = XD_ARY_LEN(s_chrProgs);
@@ -179,8 +195,7 @@ static int find_pint_prog(const char* pActName, CharPintProg* pProg) {
 
 static void char_pint_roam_ctrl(SmpChar* pChar) {
 	if (!pChar) return;
-	double objTouchDT = pChar->get_obj_touch_duration_secs();
-	double wallTouchDT = pChar->get_wall_touch_duration_secs();
+
 	size_t nprogs = XD_ARY_LEN(s_chrProgs);
 
 	if (pChar->mAction < nprogs) {
@@ -260,6 +275,20 @@ static void char_roam_ctrl(SmpChar* pChar) {
 			}
 			break;
 	}
+}
+
+static void init_single_char() {
+	SmpChar::Descr descr;
+	descr.reset();
+	bool disableSl = nxApp::get_bool_opt("scl_off", false);
+
+	SmpChar::CtrlFunc ctrlFunc = char_roam_ctrl;
+	if (s_roamProgKind == RoamProgKind::PINT) {
+		ctrlFunc = char_pint_roam_ctrl;
+	}
+	float x = -5.57f;
+	ScnObj* pObj = SmpCharSys::add_f(descr, ctrlFunc);
+	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
 }
 
 static void init_chars() {
@@ -356,6 +385,7 @@ static void init() {
 		load_pint_progs();
 	}
 
+	//init_single_char();
 	init_chars();
 	init_stage();
 	s_execStopWatch.alloc(120);
@@ -378,6 +408,7 @@ static void init() {
 		s_pFuncLib->register_func(s_df_ck_act_timeout_desc);
 		s_pFuncLib->register_func(s_df_get_obj_touch_duration_secs_desc);
 		s_pFuncLib->register_func(s_df_get_wall_touch_duration_secs_desc);
+		s_pFuncLib->register_func(s_df_math_fit_desc);
 	} else if (s_roamProgKind == RoamProgKind::PLOP) {
 		nxCore::dbg_msg("PLOP");
 	} else {

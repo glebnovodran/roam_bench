@@ -2,12 +2,11 @@
 (defvar newActDuration 0)
 (defvar wallTouchReset 0)
 
-(if (not (check_act_timeout)) (break))
-(if (logior (<= (get_obj_touch_duration_secs) 0.2) (<= (get_wall_touch_duration_secs) 0.25)) (break))
+(if (logand (not (check_act_timeout)) (<= (get_obj_touch_duration_secs) 0.2) (<= (get_wall_touch_duration_secs) 0.25)) (break))
 
 (defvar sel0 (< (logand (glb_rng_next) 0x3F) 0x1F))
 (defvar selTurn (< (logand (glb_rng_next) 1)))
-(defvar t (math_fit((glb_rng_f01) 0.0 1.0 0.5 2.0)))
+(defvar t (math_fit (glb_rng_01) 0.0 1.0 0.5 2.0) )
 
 (set newActName (if sel0 "retreat" (if selTurn "ACT_TURN_L" "ACT_TURN_R")))
 (set newActDuration (if sel0 0.5 t))
