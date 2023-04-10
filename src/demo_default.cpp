@@ -142,6 +142,28 @@ static const Pint::FuncDef s_df_ck_act_timeout_desc = {
 	"check_act_timeout", ck_act_timeout, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
 };
 
+Pint::Value get_obj_touch_duration_secs(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+	Pint::Value res;
+	SmpChar* pChar = reinterpret_cast<SmpChar*>(ctx.get_local_binding());
+	res.set_num(pChar->get_obj_touch_duration_secs());
+	return res;
+}
+
+static const Pint::FuncDef s_df_get_obj_touch_duration_secs_desc = {
+	"get_obj_touch_duration_secs", get_obj_touch_duration_secs, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
+};
+
+Pint::Value get_wall_touch_duration_secs(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+	Pint::Value res;
+	SmpChar* pChar = reinterpret_cast<SmpChar*>(ctx.get_local_binding());
+	res.set_num(pChar->get_wall_touch_duration_secs());
+	return res;
+}
+
+static const Pint::FuncDef s_df_get_wall_touch_duration_secs_desc = {
+	"get_wall_touch_duration_secs", get_wall_touch_duration_secs, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
+};
+
 static int find_pint_prog(const char* pActName, CharPintProg* pProg) {
 	int idx = -1;
 	size_t nacts = XD_ARY_LEN(s_chrProgs);
@@ -354,6 +376,8 @@ static void init() {
 		s_pFuncLib->register_func(s_df_rng_next_desc);
 		s_pFuncLib->register_func(s_df_rng_01_desc);
 		s_pFuncLib->register_func(s_df_ck_act_timeout_desc);
+		s_pFuncLib->register_func(s_df_get_obj_touch_duration_secs_desc);
+		s_pFuncLib->register_func(s_df_get_wall_touch_duration_secs_desc);
 	} else if (s_roamProgKind == RoamProgKind::PLOP) {
 		nxCore::dbg_msg("PLOP");
 	} else {

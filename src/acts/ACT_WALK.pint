@@ -3,7 +3,7 @@
 (defvar wallTouchReset 0)
 
 (if (not (check_act_timeout)) (break))
-(if (logior (<= (objTouchDT) 0.2) (<= (wallTouchDT) 0.25)) (break))
+(if (logior (<= (get_obj_touch_duration_secs) 0.2) (<= (get_wall_touch_duration_secs) 0.25)) (break))
 
 (defvar sel0 (< (logand (glb_rng_next) 0x3F) 0x1F))
 (defvar selTurn (< (logand (glb_rng_next) 1)))
