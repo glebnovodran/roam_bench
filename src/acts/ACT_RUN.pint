@@ -3,8 +3,8 @@
 (defvar wallTouchReset 0)
 
 (if (not (check_act_timeout)) (break))
-(if (le (wallTouchDT) 0.1) (break))
-(if (le (objTouchDT) 0.1) (break))
+(if (<= (wallTouchDT) 0.1) (break))
+(if (<= (objTouchDT) 0.1) (break))
 
-(set newActName "stand")
+(set newActName "ACT_STAND")
 (set newActDuration 2.0)
