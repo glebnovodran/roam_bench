@@ -291,6 +291,23 @@ static void init_single_char() {
 	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
 }
 
+static void init_two_chars() {
+	SmpChar::Descr descr;
+	descr.reset();
+	bool disableSl = nxApp::get_bool_opt("scl_off", false);
+
+	SmpChar::CtrlFunc ctrlFunc = char_roam_ctrl;
+	if (s_roamProgKind == RoamProgKind::PINT) {
+		ctrlFunc = char_pint_roam_ctrl;
+	}
+	float x = -5.57f;
+	ScnObj* pObj = SmpCharSys::add_f(descr, ctrlFunc);
+	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
+	x += 0.7f;
+	pObj = SmpCharSys::add_m(descr, ctrlFunc);
+	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
+}
+
 static void init_chars() {
 	SmpChar::Descr descr;
 	descr.reset();
@@ -382,10 +399,12 @@ static void init() {
 	SmpCharSys::init();
 
 	if (s_roamProgKind == RoamProgKind::PINT) {
+		Pint::set_mem_lock(Scene::get_glb_mem_lock());
 		load_pint_progs();
 	}
 
 	//init_single_char();
+	//init_two_chars();
 	init_chars();
 	init_stage();
 	s_execStopWatch.alloc(120);
@@ -539,7 +558,6 @@ static void profile_end() {
 static bool chr_exec_init_pint_func(ScnObj* pObj, void* pWkMem) {
 	SmpChar* pChr = SmpCharSys::char_from_obj(pObj);
 	if (pChr) {
-		//
 		Pint::ExecContext* pCtx = nxCore::tMem<Pint::ExecContext>::alloc();
 		pCtx->init(pChr);
 		pChr->set_ptr_wk<Pint::ExecContext>(int(BindIdx::EXECONTEXT), pCtx);
@@ -555,10 +573,8 @@ static void chr_exec_init() {
 }
 
 static bool chr_exec_reset_pint_func(ScnObj* pObj, void* pWkMem) {
-	using namespace Pint;
 	SmpChar* pChr = SmpCharSys::char_from_obj(pObj);
 	if (pChr) {
-		//
 		Pint::ExecContext* pCtx = pChr->get_ptr_wk<Pint::ExecContext>(int(BindIdx::EXECONTEXT));
 		nxCore::tMem<Pint::ExecContext>::free(pCtx);
 	}
