@@ -20,7 +20,7 @@ static struct CharPintProg {
 	{ "ACT_TURN_L", "ACT_TURN", nullptr, 0 },
 	{ "ACT_TURN_R", "ACT_TURN", nullptr, 0 },
 	{ "ACT_WALK", "ACT_WALK", nullptr, 0 },
-	{ "ACT_RETREAT", "ACT_RETREAT",nullptr, 0 },
+	{ "ACT_RETREAT", "ACT_RETREAT", nullptr, 0 },
 	{ "ACT_RUN", "ACT_RUN", nullptr, 0 }
 };
 
@@ -43,7 +43,7 @@ static char* load_prog(const char* pName, size_t& srcSize) {
 
 		XD_SPRINTF(XD_SPRINTF_BUF(pSrcPath, bufSize), "%s/%s/%s.pint", pDataPath ? pDataPath : ".", "acts", pName);
 		srcSize = 0;
-		pProg = reinterpret_cast<char*>(nxCore::raw_bin_load(pSrcPath, &srcSize));
+		pProg = reinterpret_cast<char*>(nxCore::bin_load(pSrcPath, &srcSize, false, true));
 		if (pSrcPath != path) {
 			nxCore::mem_free(pSrcPath);
 		}
