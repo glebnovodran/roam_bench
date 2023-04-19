@@ -63,12 +63,14 @@ FMT_OFF=${NO_FMT-"\e[0m"}
 
 WEB_CXX=""
 WEB_BUILD=0
+WEB_WASM=0
+WEB_TGT="JS"
 
 if [ "$#" -gt 0 ]; then
 	case $1 in
 		clean)
 			printf "$FMT_RED$FMT_BOLD""Removing temporary files!""$FMT_OFF\n"
-			for tdir in core inc prog tmp $SHADERS_TGT_DIR; do
+			for tdir in core pint inc prog tmp $SHADERS_TGT_DIR; do
 				if [ -d $tdir ]; then
 					printf " * ""$FMT_BOLD""$tdir""$FMT_OFF\n"
 					rm -rf $tdir/*
@@ -89,6 +91,11 @@ if [ "$#" -gt 0 ]; then
 			WEB_BUILD=1
 			if [ -n "$EMSDK" ]; then
 				shift
+				if [ "$1" = "wasm" ]; then
+					WEB_WASM=1
+					WEB_TGT="WASM"
+					shift
+				fi
 				WEB_CXX="em++"
 			fi
 		;;
@@ -193,7 +200,7 @@ if [ $NEED_PINT -ne 0 ]; then
 	printf "$FMT_B_RED""-> Downloading pint sources...""$FMT_OFF\n"
 	for src in $PINT_SRCS; do
 		if [ ! -f $PINT_DIR/$src ]; then
-			printf "$FMT_B_BLUE""     $src""$FMT_OFF\n"
+			printf "$FMT_B_YELLOW""     $src""$FMT_OFF\n"
 			$DL_CMD $PINT_DIR/$src $PINT_SRC_URL/$src
 		fi
 	done
@@ -354,7 +361,7 @@ if [ $WEB_BUILD -ne 0 ]; then
 	ls -1d */* | $MKROM_EXE -nobin:1 -txt:$XROM_PATH
 	cd $BUILD_PATH
 	WEB_OPTS="-std=c++11 -O3"
-	WEB_OPTS="$WEB_OPTS -s WASM=0 -s SINGLE_FILE"
+	WEB_OPTS="$WEB_OPTS -s WASM=$WEB_WASM -s SINGLE_FILE"
 	WEB_OPTS="$WEB_OPTS -s SINGLE_FILE -s USE_SDL=2 -s ASSERTIONS=1"
 	WEB_OPTS="$WEB_OPTS -s INITIAL_MEMORY=50MB -s ALLOW_MEMORY_GROWTH=1"
 	WEB_OPTS="$WEB_OPTS -DXD_THREADFUNCS_ENABLED=0 -DXD_FILEFUNCS_ENABLED=0"
@@ -363,7 +370,7 @@ if [ $WEB_BUILD -ne 0 ]; then
 	$WEB_CXX $WEB_OPTS $INCS $SRCS $XROM_PATH --pre-js src/web/opt.js --shell-file src/web/shell.html -o $PROG_HTML -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_main","_wi_set_key_state"]' $*
 	if [ -f "$PROG_HTML" ]; then
 		sed -i 's/antialias:!1/antialias:1/g' $PROG_HTML
-		DATE_EXPR="s/Build date:.../Build date: $BUILD_DATE | JS\/ROM ver./g"
+		DATE_EXPR="s/Build date:.../Build date: $BUILD_DATE | $WEB_TGT\/ROM ver./g"
 		sed -i "$DATE_EXPR" $PROG_HTML
 		printf "web-build: ""$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
 	else
