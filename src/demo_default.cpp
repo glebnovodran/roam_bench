@@ -1,4 +1,5 @@
 #include "crosscore.hpp"
+#include "oglsys.hpp"
 #include "scene.hpp"
 #include "demo.hpp"
 #include "smprig.hpp"
@@ -12,6 +13,8 @@ DEMO_PROG_BEGIN
 static cxStopWatch s_execStopWatch;
 static float s_medianExecMillis = -1.0f;
 static int s_exerep = 1;
+static int s_dummyFPS = 0;
+static int s_minimapMode = 0;
 
 static RoamProgKind s_roamProgKind = RoamProgKind::NATIVE;
 
@@ -170,6 +173,8 @@ static void init() {
 		nxCore::dbg_msg("NATIVE");
 	}
 	nxCore::dbg_msg("\n");
+	s_dummyFPS = nxApp::get_int_opt("dummyfps", 0);
+	s_minimapMode = nxApp::get_int_opt("minimap_mode", 0);
 }
 
 static struct ViewWk {
@@ -227,6 +232,74 @@ static void set_scene_ctx() {
 	Scene::set_linear_bias(-0.025f);
 }
 
+#define D_MINIMAP_W 24
+#define D_MINIMAP_H 18
+
+static char s_minimap[(D_MINIMAP_W + 1)*D_MINIMAP_H + 1];
+static bool s_minimapFlg = false;
+
+struct MINIMAP_WK {
+	cxAABB bbox;
+	char* pMap;
+	int w;
+	int h;
+};
+
+static bool minimap_obj_func(ScnObj* pObj, void* pWkMem) {
+	SmpChar* pChr = SmpCharSys::char_from_obj(pObj);
+	if (pChr) {
+		MINIMAP_WK* pWk = (MINIMAP_WK*)pWkMem;
+		if (pWk) {
+			cxVec wpos = pObj->get_world_pos();
+			cxVec rel = wpos - pWk->bbox.get_min_pos();
+			cxVec sv = pWk->bbox.get_size_vec();
+			cxVec isv = nxVec::rcp0(sv);
+			float x = nxCalc::saturate(rel.x * isv.x);
+			float z = nxCalc::saturate(rel.z * isv.z);
+			int ix = (int)(mth_roundf(x * float(D_MINIMAP_W - 1)));
+			int iy = (int)(mth_roundf(z * float(D_MINIMAP_H - 1)));
+			if (pWk->pMap) {
+				int idx = iy*(D_MINIMAP_W + 1) + ix;
+				char sym = '*';
+				if (s_minimapMode != 0) {
+					sym = ' ';
+					if (SmpCharSys::obj_is_f(pObj)) {
+						sym = 'f';
+					} else if (SmpCharSys::obj_is_m(pObj)) {
+						sym = 'm';
+					}
+				}
+				pWk->pMap[idx] = sym;
+			}
+		}
+	}
+	return true;
+}
+
+static void print_minimap() {
+	sxCollisionData* pCol = SmpCharSys::get_collision();
+	if (!pCol) return;
+	MINIMAP_WK wk;
+	wk.bbox = pCol->mBBox;
+	wk.w = D_MINIMAP_W;
+	wk.h = D_MINIMAP_H;
+	wk.pMap = s_minimap;
+	nxCore::mem_zero(s_minimap, sizeof(s_minimap));
+	char* pDst = wk.pMap;
+	for (int y = 0; y < D_MINIMAP_H; ++y) {
+		for (int x = 0; x < D_MINIMAP_W; ++x) {
+			*pDst++ = '.';
+		}
+		*pDst++ = '\n';
+	}
+	Scene::for_each_obj(minimap_obj_func, &wk);
+	if (s_minimapFlg) {
+		nxCore::dbg_msg("\x1B[%dA\x1B[G", D_MINIMAP_H);
+	}
+	nxCore::dbg_msg("%s", s_minimap);
+	s_minimapFlg = true;
+}
+
 static void draw_2d() {
 	char str[512];
 	const char* fpsStr = "FPS: ";
@@ -267,6 +340,11 @@ static void draw_2d() {
 	Scene::print(sx, sy, cxColor(0.1f, 0.75f, 0.1f, 1.0f), str);
 	sx += 120.0f;
 
+	if (OGLSys::is_dummy()) {
+		print_minimap();
+		nxCore::dbg_msg("\x1B[G[\x1B[1m\x1B[42m\x1B[93m %s", str);
+	}
+
 	float exe = s_medianExecMillis;
 	if (exe <= 0.0f) {
 		XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s--", exeStr);
@@ -274,6 +352,10 @@ static void draw_2d() {
 		XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s%.4f millis", exeStr, exe);
 	}
 	Scene::print(sx, sy, cxColor(0.5f, 0.4f, 0.1f, 1.0f), str);
+
+	if (OGLSys::is_dummy()) {
+		nxCore::dbg_msg("  %s \x1B[0m]   ", str);
+	}
 }
 
 static void profile_start() {
@@ -311,7 +393,31 @@ static void scn_exec() {
 	}
 }
 
+static double s_dummyglTStamp = 0.0;
+
+static void dummygl_begin() {
+	if (OGLSys::is_dummy() && s_dummyFPS > 0) {
+		s_dummyglTStamp = nxSys::time_micros();
+	}
+}
+
+static void dummygl_end() {
+	if (OGLSys::is_dummy() && s_dummyFPS > 0) {
+		double usStart = s_dummyglTStamp;
+		double usEnd = nxSys::time_micros();
+		double refMillis = 1000.0 / double(s_dummyFPS);
+		double frameMillis = (usEnd - usStart) / 1000.0;
+		if (frameMillis < refMillis) {
+			double sleepMillis = ::mth_round(refMillis - frameMillis);
+			if (sleepMillis > 0.0) {
+				nxSys::sleep_millis((uint32_t)sleepMillis);
+			}
+		}
+	}
+}
+
 static void loop(void* pLoopCtx) {
+	dummygl_begin();
 	SmpCharSys::start_frame();
 	set_scene_ctx();
 	profile_start();
@@ -323,6 +429,7 @@ static void loop(void* pLoopCtx) {
 	Scene::draw();
 	draw_2d();
 	Scene::frame_end();
+	dummygl_end();
 }
 
 static void reset() {
