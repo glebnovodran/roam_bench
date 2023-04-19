@@ -180,15 +180,13 @@ void roam_ctrl_pint(SmpChar* pChar) {
 				double newActDuration = 0.0;
 				Pint::Value* pDurationVal = pCtx->var_val(pCtx->find_var("newActDuration"));
 				newActDuration = pDurationVal ? pDurationVal->val.num : 0.0;
-				if (nxCore::str_eq(pNewActName, "TURN_L") || nxCore::str_eq(pNewActName, "TURN_R")) {
-					nxCore::dbg_msg("Turning\n");
-				}
+
 				pChar->change_act(actId, newActDuration);
 			}
 		}
 
 		Pint::Value* pWTResetVal = pCtx->var_val(pCtx->find_var("wallTouchReset"));
-		bool wallTouchReset = pWTResetVal ? pWTResetVal->val.num == 1.0 : false;
+		bool wallTouchReset = pWTResetVal ? bool(pWTResetVal->val.num) : false;
 		if (wallTouchReset) {
 			pChar->reset_wall_touch();
 		}
