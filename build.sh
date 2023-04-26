@@ -276,8 +276,8 @@ fi
 INCS="-I $CORE_DIR -I $INC_DIR -I $PINT_DIR"
 SRCS="`ls $SRC_DIR/*.cpp` `ls $CORE_DIR/*.cpp` `ls $PINT_DIR/*.cpp`"
 
-DEFS="-DX11"
-LIBS="-lX11"
+DEFS=${ALT_DEFS-"-DX11"}
+LIBS=${ALT_LIBS-"-lX11"}
 
 DEF_CXX="g++"
 case $SYS_NAME in
