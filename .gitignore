@@ -10,3 +10,5 @@ data/simple_ogl/**
 data/acts/**
 run.sh
 CMake*
+qjs/*
+!/qjs/qjs_build.sh
