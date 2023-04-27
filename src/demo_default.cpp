@@ -221,7 +221,7 @@ static void init() {
 	s_minimapMode = nxApp::get_int_opt("minimap_mode", 0);
 
 	int numAvgSmps = nxApp::get_int_opt("avg_smps", 0);
-	nxCore::dbg_msg("numAvgSmps : %d", numAvgSmps);
+
 	s_avgFPS.init(numAvgSmps);
 	s_avgEXE.init(numAvgSmps);
 }
