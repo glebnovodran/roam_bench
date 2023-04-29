@@ -30,6 +30,8 @@ if [ -n $DL_CMD ]; then
 			cp -f quickjs-$QJS_VER/$qjs_src*.* $SRC_DIR
 		done
 	fi
+	echo "Patching for multithreading..."
+	sed -i 's/#define CONFIG_STACK_CHECK/#define _NO_CONFIG_STACK_CHECK/g' $SRC_DIR/quickjs.c
 	rm -rdf quickjs-$QJS_VER
 fi
 
