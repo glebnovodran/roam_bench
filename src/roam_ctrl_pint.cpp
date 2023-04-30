@@ -1,9 +1,10 @@
 #include "crosscore.hpp"
 #include "scene.hpp"
-#include "demo.hpp"
 #include "smprig.hpp"
 #include "smpchar.hpp"
 #include "pint.hpp"
+
+#include "roam_ctrl.hpp"
 
 enum class BindIdx {
 	EXECONTEXT = 0,
@@ -75,7 +76,7 @@ static void load_pint_progs() {
 	}
 }
 
-Pint::Value scn_rng_next(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+static Pint::Value scn_rng_next(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
 	Pint::Value res;
 	uint64_t rnd = Scene::glb_rng_next();
 	rnd &= 0xffffffff;
@@ -86,7 +87,7 @@ static const Pint::FuncDef s_df_rng_next_desc = {
 	"glb_rng_next", scn_rng_next, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
 };
 
-Pint::Value scn_rng_01(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+static Pint::Value scn_rng_01(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
 	Pint::Value res;
 	float rnd = Scene::glb_rng_f01();
 	res.set_num(double(rnd));
@@ -96,7 +97,7 @@ static const Pint::FuncDef s_df_rng_01_desc = {
 	"glb_rng_01", scn_rng_01, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
 };
 
-Pint::Value ck_act_timeout(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+static Pint::Value ck_act_timeout(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
 	Pint::Value res;
 	SmpChar* pChar = reinterpret_cast<SmpChar*>(ctx.get_local_binding());
 	bool isTimeOut = pChar->check_act_time_out();
@@ -108,7 +109,7 @@ static const Pint::FuncDef s_df_ck_act_timeout_desc = {
 	"check_act_timeout", ck_act_timeout, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
 };
 
-Pint::Value get_obj_touch_duration_secs(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+static Pint::Value get_obj_touch_duration_secs(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
 	Pint::Value res;
 	SmpChar* pChar = reinterpret_cast<SmpChar*>(ctx.get_local_binding());
 	res.set_num(pChar->get_obj_touch_duration_secs());
@@ -119,7 +120,7 @@ static const Pint::FuncDef s_df_get_obj_touch_duration_secs_desc = {
 	"get_obj_touch_duration_secs", get_obj_touch_duration_secs, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
 };
 
-Pint::Value get_wall_touch_duration_secs(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+static Pint::Value get_wall_touch_duration_secs(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
 	Pint::Value res;
 	SmpChar* pChar = reinterpret_cast<SmpChar*>(ctx.get_local_binding());
 	res.set_num(pChar->get_wall_touch_duration_secs());
@@ -130,7 +131,7 @@ static const Pint::FuncDef s_df_get_wall_touch_duration_secs_desc = {
 	"get_wall_touch_duration_secs", get_wall_touch_duration_secs, 0, Pint::Value::Type::NUM, {Pint::Value::Type::NUM}
 };
 
-Pint::Value math_fit(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
+static Pint::Value math_fit(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
 	Pint::Value res;
 	double val = pArgs[0].val.num;
 	double oldMin = pArgs[1].val.num;

@@ -1,8 +1,9 @@
 #include "crosscore.hpp"
 #include "scene.hpp"
-#include "demo.hpp"
 #include "smprig.hpp"
 #include "smpchar.hpp"
+
+#include "roam_ctrl.hpp"
 
 void roam_ctrl_native(SmpChar* pChar) {
 	if (!pChar) return;
