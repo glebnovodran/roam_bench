@@ -181,6 +181,8 @@ static void init() {
 			s_roamProgKind = RoamProgKind::PINT;
 		} else if (nxCore::str_eq(pRoamProgOpt, "plop")) {
 			s_roamProgKind = RoamProgKind::PLOP;
+		} else if (nxCore::str_eq(pRoamProgOpt, "qjs")) {
+			s_roamProgKind = RoamProgKind::QJS;
 		}
 	}
 
@@ -192,6 +194,9 @@ static void init() {
 	if (s_roamProgKind == RoamProgKind::PINT) {
 		ctrlFunc = roam_ctrl_pint;
 		init_roam_pint();
+	} else if (s_roamProgKind == RoamProgKind::QJS) {
+		ctrlFunc = roam_ctrl_qjs;
+		init_roam_qjs();
 	}
 
 	//init_single_char(ctrlFunc);
@@ -212,6 +217,8 @@ static void init() {
 		nxCore::dbg_msg("PINT");
 	} else if (s_roamProgKind == RoamProgKind::PLOP) {
 		nxCore::dbg_msg("PLOP");
+	} else if (s_roamProgKind == RoamProgKind::QJS) {
+		nxCore::dbg_msg("QJS");
 	} else {
 		nxCore::dbg_msg("NATIVE");
 	}
@@ -505,6 +512,8 @@ static void reset() {
 
 	if (s_roamProgKind == RoamProgKind::PINT) {
 		reset_roam_pint();
+	} else if (s_roamProgKind == RoamProgKind::QJS) {
+		reset_roam_qjs();
 	}
 }
 

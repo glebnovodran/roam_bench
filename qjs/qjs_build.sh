@@ -18,7 +18,7 @@ elif [ -x "`command -v wget`" ]; then
 	DL_CMD="wget -O"
 fi
 
-if [ -n $DL_CMD ]; then
+if [ -n "$DL_CMD" ]; then
 	mkdir -p $TMP_DIR
 	$DL_CMD $TMP_DIR/$QJS_TAR $QJS_URL
 	if [ -f $TMP_DIR/$QJS_TAR ]; then
@@ -49,4 +49,5 @@ for qjs_src in $QJS_SRCS; do
 	fi
 done
 
-ar -cqv $QJS_OUT obj/*.o
+AR=${AR:-ar}
+$AR -cqv $QJS_OUT obj/*.o
