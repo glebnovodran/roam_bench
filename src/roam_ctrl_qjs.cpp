@@ -172,8 +172,9 @@ static struct ROAM_QJS_WK {
 			mpCtx = nullptr;
 		}
 		if (mpRT) {
-			JS_FreeRuntime(mpRT);
-			mpRT = nullptr;
+			// commented to avoid assertion fired by QJS
+			// JS_FreeRuntime(mpRT);
+			// mpRT = nullptr;
 		}
 
 		mProgSize = 0;
