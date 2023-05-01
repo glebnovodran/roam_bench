@@ -176,7 +176,10 @@ static struct ROAM_QJS_WK {
 			// JS_FreeRuntime(mpRT);
 			// mpRT = nullptr;
 		}
-
+		if (mpProgSrc) {
+			nxCore::mem_free(mpProgSrc);
+			mpProgSrc = nullptr;
+		}
 		mProgSize = 0;
 
 		if (mpLock) {
