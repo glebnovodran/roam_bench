@@ -15,6 +15,8 @@ static float s_medianExecMillis = -1.0f;
 static int s_exerep = 1;
 static int s_dummyFPS = 0;
 static int s_minimapMode = 0;
+static float s_moodPeriod = -1.0f;
+static bool s_moodVis = false;
 
 static RoamProgKind s_roamProgKind = RoamProgKind::NATIVE;
 
@@ -83,12 +85,16 @@ static void init_stage() {
 		SmpCharSys::set_collision(pPkg->find_collision("col"));
 	}
 }
+
+#if 0
+static ScnObj* add_char(const SmpChar::Descr& descr, char charType, SmpChar::CtrlFunc& ctrlFunc);
+
 static void init_single_char(SmpChar::CtrlFunc& ctrlFunc) {
 	SmpChar::Descr descr;
 	descr.reset();
 
 	float x = -5.57f;
-	ScnObj* pObj = SmpCharSys::add_f(descr, ctrlFunc);
+	ScnObj* pObj = add_char(descr, 'f', ctrlFunc);
 	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
 }
 
@@ -97,11 +103,22 @@ static void init_two_chars(SmpChar::CtrlFunc& ctrlFunc) {
 	descr.reset();
 
 	float x = -5.57f;
-	ScnObj* pObj = SmpCharSys::add_f(descr, ctrlFunc);
+	ScnObj* pObj = add_char(descr, 'f', ctrlFunc);
 	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
 	x += 0.7f;
-	pObj = SmpCharSys::add_m(descr, ctrlFunc);
+	pObj = add_char(descr, 'm', ctrlFunc);
 	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
+}
+#endif
+
+static ScnObj* add_char(const SmpChar::Descr& descr, char charType, SmpChar::CtrlFunc& ctrlFunc) {
+	ScnObj* pObj = nullptr;
+	if (charType == 'f') {
+		pObj = SmpCharSys::add_f(descr, ctrlFunc);
+	} else {
+		pObj = SmpCharSys::add_m(descr, ctrlFunc);
+	}
+	return pObj;
 }
 
 static void init_chars(SmpChar::CtrlFunc& ctrlFunc) {
@@ -121,7 +138,8 @@ static void init_chars(SmpChar::CtrlFunc& ctrlFunc) {
 				descr.scale = 1.0f;
 			}
 		}
-		ScnObj* pObj = SmpCharSys::add_f(descr, ctrlFunc);
+
+		ScnObj* pObj = add_char(descr, 'f', ctrlFunc);
 		pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
 		x += 0.7f;
 	}
@@ -140,7 +158,8 @@ static void init_chars(SmpChar::CtrlFunc& ctrlFunc) {
 				descr.scale = 1.04f;
 			}
 		}
-		ScnObj* pObj = SmpCharSys::add_m(descr, ctrlFunc);
+
+		ScnObj* pObj = add_char(descr, 'm', ctrlFunc);
 		if (pObj) {
 			pObj->set_world_quat_pos(q, pos);
 		}
@@ -157,9 +176,9 @@ static void init_chars(SmpChar::CtrlFunc& ctrlFunc) {
 			descr.scale = 1.0f;
 			descr.variation = 9 - (i >> 1);
 			if (i & 1) {
-				pObj = SmpCharSys::add_f(descr, ctrlFunc);
+				pObj = add_char(descr, 'f', ctrlFunc);
 			} else {
-				pObj = SmpCharSys::add_m(descr, ctrlFunc);
+				pObj = add_char(descr, 'm', ctrlFunc);
 			}
 			if (pObj) {
 				pObj->set_world_quat_pos(q, pos);
@@ -231,6 +250,10 @@ static void init() {
 
 	s_avgFPS.init(numAvgSmps);
 	s_avgEXE.init(numAvgSmps);
+
+	s_moodPeriod = nxApp::get_float_opt("mood_period", -1.0f);
+	nxCore::dbg_msg("mood period: %f\n", s_moodPeriod);
+	s_moodVis = nxApp::get_bool_opt("mood_vis", false);
 }
 
 static struct ViewWk {
@@ -520,3 +543,17 @@ static void reset() {
 DEMO_REGISTER(default);
 
 DEMO_PROG_END
+
+bool is_mood_enabled() {
+	return s_moodPeriod > 0.0f;
+}
+
+bool is_mood_visible() {
+	return s_moodVis;
+}
+
+double calc_mood_arg(double nowTime) {
+	double s = nowTime / 1000.0;
+	double p = s_moodPeriod;
+	return nxCalc::saturate(::fmod(s, p) / p);
+}

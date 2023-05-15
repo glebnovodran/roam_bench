@@ -9,10 +9,18 @@ enum class RoamProgKind {
 	QJS
 };
 
+bool is_mood_enabled();
+
+bool is_mood_visible();
+
+double calc_mood_arg(double nowTime);
+
 // Native
+
 void roam_ctrl_native(SmpChar* pChar);
 
 // Pint
+
 void init_roam_pint();
 
 void reset_roam_pint();
