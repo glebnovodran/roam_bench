@@ -106,7 +106,6 @@ static struct PintWk {
 		if (pFuncLib) {
 			pFuncLib->reset();
 			nxCore::tMem<Pint::FuncLibrary>::free(pFuncLib, 1);
-			pFuncLib == nullptr;
 		}
 		free_act_pint_progs(pActProgs, numActProgs);
 		free_pint_prog(moodProg);
@@ -234,11 +233,15 @@ static int find_pint_prog(const char* pActName, ActPintProg** ppProg) {
 static float char_mood_calc_pint(SmpChar* pChar) {
 	Pint::ExecContext* pCtx = pChar->get_ptr_wk<Pint::ExecContext>(int(BindIdx::EXECONTEXT));
 	Pint::FuncLibrary* pFuncLib = pChar->get_ptr_wk<Pint::FuncLibrary>(int(BindIdx::FUNCLIB));
+	float mood = 0.0f;
 
-	Pint::interp(s_pintWk.moodProg.pSrc, s_pintWk.moodProg.srcSz, pCtx, pFuncLib);
-	Pint::Value* pMood = pCtx->var_val(pCtx->find_var("y"));
+	if (pCtx && pFuncLib) {
+		Pint::interp(s_pintWk.moodProg.pSrc, s_pintWk.moodProg.srcSz, pCtx, pFuncLib);
+		Pint::Value* pMood = pCtx->var_val(pCtx->find_var("y"));
+		mood = pMood->val.num;
+	}
 
-	return pMood->val.num;
+	return mood;
 }
 
 void roam_ctrl_pint(SmpChar* pChar) {
