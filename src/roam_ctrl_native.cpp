@@ -23,7 +23,7 @@ static float char_mood_calc(double nowTime) {
 void roam_ctrl_native(SmpChar* pChar) {
 	if (!pChar) return;
 
-	if (is_mood_enabled() > 0.0f) {
+	if (is_mood_enabled()) {
 		pChar->mood_update();
 		pChar->mMood = nxCalc::saturate(char_mood_calc(pChar->mMoodTimer));
 		if (is_mood_visible() && pChar->mpObj) {

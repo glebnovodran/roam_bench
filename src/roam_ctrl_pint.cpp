@@ -261,7 +261,7 @@ void roam_ctrl_pint(SmpChar* pChar) {
 		Pint::ExecContext* pCtx = pChar->get_ptr_wk<Pint::ExecContext>(int(BindIdx::EXECONTEXT));
 		Pint::FuncLibrary* pFuncLib = pChar->get_ptr_wk<Pint::FuncLibrary>(int(BindIdx::FUNCLIB));
 
-		if (is_mood_enabled() > 0.0f) {
+		if (is_mood_enabled()) {
 			pChar->mood_update();
 			pChar->mMood = nxCalc::saturate(char_mood_calc_pint(pChar));
 			if (is_mood_visible() && pChar->mpObj) {
