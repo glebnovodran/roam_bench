@@ -106,6 +106,7 @@ static struct PintWk {
 		if (pFuncLib) {
 			pFuncLib->reset();
 			nxCore::tMem<Pint::FuncLibrary>::free(pFuncLib, 1);
+			pFuncLib = nullptr;
 		}
 		free_act_pint_progs(pActProgs, numActProgs);
 		free_pint_prog(moodProg);
@@ -175,12 +176,17 @@ static const Pint::FuncDef s_df_get_wall_touch_duration_secs_desc = {
 
 static Pint::Value math_fit(Pint::ExecContext& ctx, const uint32_t nargs, Pint::Value* pArgs) {
 	Pint::Value res;
-	double val = pArgs[0].val.num;
-	double oldMin = pArgs[1].val.num;
-	double oldMax = pArgs[2].val.num;
-	double newMin = pArgs[3].val.num;
-	double newMax = pArgs[4].val.num;
-	res.set_num(nxCalc::fit(val, oldMin, oldMax, newMin, newMax));
+	res.set_none();
+	if (nargs < 5) {
+		nxCore::dbg_break("Error: math_fit - bad argument number\n");
+	} else {
+		double val = pArgs[0].val.num;
+		double oldMin = pArgs[1].val.num;
+		double oldMax = pArgs[2].val.num;
+		double newMin = pArgs[3].val.num;
+		double newMax = pArgs[4].val.num;
+		res.set_num(nxCalc::fit(val, oldMin, oldMax, newMin, newMax));
+	}
 	return res;
 }
 
@@ -238,7 +244,7 @@ static float char_mood_calc_pint(SmpChar* pChar) {
 	if (pCtx && pFuncLib) {
 		Pint::interp(s_pintWk.moodProg.pSrc, s_pintWk.moodProg.srcSz, pCtx, pFuncLib);
 		Pint::Value* pMood = pCtx->var_val(pCtx->find_var("y"));
-		mood = pMood->val.num;
+		mood = pMood ? pMood->val.num : 0.0f;
 	}
 
 	return mood;
