@@ -50,12 +50,22 @@ static JSValue jsifc_wall_touch_duration_secs(JSContext* pJsctx, JSValueConst th
 	return JS_NewFloat64(pJsctx, res);
 }
 
+static JSValue jsifc_get_mood_arg(JSContext* pJsctx, JSValueConst thisVal, int argc, JSValueConst* argv) {
+	double res = 0.0;
+	SmpChar* pChar = jsifc_get_active_char();
+	if (pChar) {
+		res = calc_mood_arg(pChar->mMoodTimer);
+	}
+	return JS_NewFloat64(pJsctx, res);
+}
+
 static JSCFunctionListEntry s_ifc_func_exps[] = {
 	JS_CFUNC_DEF("glb_rng_next", 0, jsifc_glb_rng_next),
 	JS_CFUNC_DEF("glb_rng_f01", 0, jsifc_glb_rng_f01),
 	JS_CFUNC_DEF("check_act_timeout", 0, jsifc_check_act_timeout),
 	JS_CFUNC_DEF("obj_touch_duration_secs", 0, jsifc_obj_touch_duration_secs),
-	JS_CFUNC_DEF("wall_touch_duration_secs", 0, jsifc_wall_touch_duration_secs)
+	JS_CFUNC_DEF("wall_touch_duration_secs", 0, jsifc_wall_touch_duration_secs),
+	JS_CFUNC_DEF("get_mood_arg", 0, jsifc_get_mood_arg)
 };
 
 static char* load_js_prog(const char* pName, size_t& srcSize) {
@@ -92,7 +102,7 @@ static char* load_js_prog(const char* pName, size_t& srcSize) {
 	return pProg;
 }
 
-static struct JSActFunc {
+static struct JSFunc {
 	const char* pName;
 	JSValue funcVal;
 } s_actFuncs[] = {
@@ -103,6 +113,8 @@ static struct JSActFunc {
 	{ "RETREAT", JS_NULL },
 	{ "RUN", JS_NULL }
 };
+
+static JSFunc s_moodFunc = { "char_mood_calc", JS_NULL };
 
 static struct ROAM_QJS_WK {
 	JSRuntime* mpRT;
@@ -158,6 +170,14 @@ static struct ROAM_QJS_WK {
 						s_actFuncs[i].funcVal = JS_NULL;
 					}
 				}
+				JSValue func = JS_GetPropertyStr(mpCtx, glbObj, s_moodFunc.pName);
+				if (JS_IsFunction(mpCtx, func)) {
+					nxCore::dbg_msg("QJS: func %s OK\n", s_moodFunc.pName);
+					s_moodFunc.funcVal = func;
+				} else {
+					nxCore::dbg_msg("QJS: func %s not found\n", s_moodFunc.pName);
+					s_moodFunc.funcVal = JS_NULL;
+				}
 				mExecFlg = true;
 			}
 		}
@@ -188,6 +208,28 @@ static struct ROAM_QJS_WK {
 		}
 	}
 
+	double char_mood_calc_js(SmpChar* pChar) {
+		double mood = 0.0;
+		JSValue func = s_moodFunc.funcVal;
+		if (JS_IsFunction(mpCtx, func)) {
+			JSValue glbObj = JS_GetGlobalObject(mpCtx);
+			JSValue res = JS_Call(mpCtx, func, glbObj, 0, nullptr);
+			if (JS_IsNumber(res)) {
+				mood = JS_VALUE_GET_FLOAT64(res);
+			} else {
+				nxCore::dbg_msg("QJS: invalid func res for %s\n", s_moodFunc.pName);
+				if (JS_IsException(res)) {
+					js_std_dump_error(mpCtx);
+				}
+			}
+
+		} else {
+			nxCore::dbg_msg("QJS: no func for %s\n", s_moodFunc.pName);
+		}
+
+		return mood;
+	}
+
 	void exec() {
 		if (!mpCtx) return;
 		if (!mExecFlg) return;
@@ -195,6 +237,15 @@ static struct ROAM_QJS_WK {
 
 		SmpChar* pChar = SmpCharSys::char_from_obj(mpActiveObj);
 		if (!pChar) return;
+
+		if (is_mood_enabled()) {
+			pChar->mood_update();
+			pChar->mMood = nxCalc::saturate(char_mood_calc_js(pChar));
+			if (is_mood_visible() && pChar->mpObj) {
+				float moodc = pChar->mMood;
+				pChar->mpObj->set_base_color_scl(moodc, moodc, moodc);
+			}
+		}
 
 		int32_t nowAct = pChar->mAction;
 		if (nowAct < 0 || nowAct >= XD_ARY_LEN(s_actFuncs)) {
