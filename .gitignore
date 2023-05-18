@@ -12,3 +12,5 @@ run.sh
 CMake*
 qjs/*
 !/qjs/qjs_build.sh
+lua/*
+!/lua/lua_build.sh
