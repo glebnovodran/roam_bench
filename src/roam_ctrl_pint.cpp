@@ -48,6 +48,12 @@ static char* load_prog(const char* pName, size_t& srcSize) {
 		XD_SPRINTF(XD_SPRINTF_BUF(pSrcPath, bufSize), "%s/%s/%s.pint", pDataPath ? pDataPath : ".", "acts", pName);
 		srcSize = 0;
 		pProg = reinterpret_cast<char*>(nxCore::bin_load(pSrcPath, &srcSize, false, true));
+		if (pProg && srcSize > 0) {
+			if (nxApp::get_bool_opt("pint_cache", false)) {
+				Pint::cache(pProg, srcSize);
+			}
+		}
+
 		if (pSrcPath != path) {
 			nxCore::mem_free(pSrcPath);
 		}
