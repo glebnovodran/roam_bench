@@ -48,6 +48,8 @@ function STAND()
 			wallReset = true
 		end
 	end
+
+	return newAct, newDuration, wallReset
 end
 
 function WALK()
@@ -70,6 +72,8 @@ function WALK()
 			newDuration = t
 		end
 	end
+
+	return newAct, newDuration, wallReset
 end
 
 function RUN()
@@ -82,6 +86,8 @@ function RUN()
 		newAct = "STAND"
 		newDuration = 2.0
 	end
+
+	return newAct, newDuration, wallReset
 end
 
 function RETREAT()
@@ -89,10 +95,12 @@ function RETREAT()
 	newDuration = 0.0
 	wallReset = false
 	wallTouchDT = wall_touch_duration_secs()
-	if (check_act_timeout() || wallTouchDT > 0.1) {
+	if check_act_timeout() or wallTouchDT > 0.1 {
 		newAct = "STAND"
 		newDuration = 2.0
 	}
+
+	return newAct, newDuration, wallReset
 end
 
 function TURN_L()
@@ -103,6 +111,8 @@ function TURN_L()
 		newAct = "STAND"
 		newDuration = 1.0
 	end
+
+	return newAct, newDuration, wallReset
 end
 
 function TURN_R()
@@ -113,4 +123,6 @@ function TURN_R()
 		newAct = "STAND"
 		newDuration = 1.0
 	end
+
+	return newAct, newDuration, wallReset
 end
