@@ -63,7 +63,7 @@ static struct ActLuaProg {
 
 static struct RoamLuaWk {
 	lua_State* mpLua;
-	//sxLock* mpLock;
+	sxLock* mpLock;
 	ScnObj* mpActiveObj;
 	char* mpProgSrc;
 	bool mExecFlg;
@@ -86,6 +86,7 @@ static struct RoamLuaWk {
 		mExecFlg = false;
 
 		if (mpLua) {
+			mpLock = nxSys::lock_create();
 			nxCore::dbg_msg("Lua state: %p\n", mpLua);
 			register_ifc_funcs();
 
@@ -110,6 +111,10 @@ static struct RoamLuaWk {
 		}
 		if (mpProgSrc) {
 			nxCore::bin_unload(mpProgSrc);
+		}
+		if (mpLock) {
+			nxSys::lock_destroy(mpLock);
+			mpLock = nullptr;
 		}
 	}
 
@@ -246,8 +251,18 @@ void reset_roam_lua() {
 
 void roam_ctrl_lua(SmpChar* pChar) {
 #if ROAM_LUA
+	if (!pChar) return;
+
+	if (s_lua.mpLock) {
+		nxSys::lock_acquire(s_lua.mpLock);
+	}
+
 	s_lua.mpActiveObj = pChar->mpObj;
 	s_lua.exec();
 	s_lua.mpActiveObj = nullptr;
+
+	if (s_lua.mpLock) {
+		nxSys::lock_release(s_lua.mpLock);
+	}
 #endif
 }
