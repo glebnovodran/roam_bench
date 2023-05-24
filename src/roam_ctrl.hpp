@@ -3,7 +3,7 @@
 #endif
 
 #ifndef ROAM_LUA
-#	define ROAM_LUA 1
+#	define ROAM_LUA 0
 #endif
 
 enum class RoamProgKind {
