@@ -93,29 +93,29 @@ static void load_act_pint_progs(ActPintProg* pActProgs, size_t nprogs) {
 
 
 static struct PintWk {
-	ActPintProg* pActProgs;
-	PintProg moodProg;
-	Pint::FuncLibrary* pFuncLib;
-	size_t numActProgs;
+	ActPintProg* mpActProgs;
+	PintProg mMoodProg;
+	Pint::FuncLibrary* mpFuncLib;
+	size_t mNumActProgs;
 
 	void init() {
 		Pint::set_mem_lock(Scene::get_glb_mem_lock());
-		init_func_lib(&pFuncLib);
-		load_act_pint_progs(pActProgs, numActProgs);
-		moodProg.pSrc = load_prog("mood", moodProg.srcSz);
-		if (moodProg.pSrc == nullptr) {
+		init_func_lib(&mpFuncLib);
+		load_act_pint_progs(mpActProgs, mNumActProgs);
+		mMoodProg.pSrc = load_prog("mood", mMoodProg.srcSz);
+		if (mMoodProg.pSrc == nullptr) {
 			nxCore::dbg_msg("Can't load mood program\n");
 		}
 	}
 
 	void reset() {
-		if (pFuncLib) {
-			pFuncLib->reset();
-			nxCore::tMem<Pint::FuncLibrary>::free(pFuncLib, 1);
-			pFuncLib = nullptr;
+		if (mpFuncLib) {
+			mpFuncLib->reset();
+			nxCore::tMem<Pint::FuncLibrary>::free(mpFuncLib, 1);
+			mpFuncLib = nullptr;
 		}
-		free_act_pint_progs(pActProgs, numActProgs);
-		free_pint_prog(moodProg);
+		free_act_pint_progs(mpActProgs, mNumActProgs);
+		free_pint_prog(mMoodProg);
 	}
 
 } s_pintWk = {
@@ -248,7 +248,7 @@ static float char_mood_calc_pint(SmpChar* pChar) {
 	float mood = 0.0f;
 
 	if (pCtx && pFuncLib) {
-		Pint::interp(s_pintWk.moodProg.pSrc, s_pintWk.moodProg.srcSz, pCtx, pFuncLib);
+		Pint::interp(s_pintWk.mMoodProg.pSrc, s_pintWk.mMoodProg.srcSz, pCtx, pFuncLib);
 		Pint::Value* pMood = pCtx->var_val(pCtx->find_var("y"));
 		mood = pMood ? pMood->val.num : 0.0f;
 	}
@@ -306,7 +306,7 @@ bool chr_exec_init_pint_func(ScnObj* pObj, void* pWkMem) {
 		Pint::ExecContext* pCtx = nxCore::tMem<Pint::ExecContext>::alloc();
 		pCtx->init(pChr);
 		pChr->set_ptr_wk<Pint::ExecContext>(int(BindIdx::EXECONTEXT), pCtx);
-		pChr->set_ptr_wk<Pint::FuncLibrary>(int(BindIdx::FUNCLIB), s_pintWk.pFuncLib);
+		pChr->set_ptr_wk<Pint::FuncLibrary>(int(BindIdx::FUNCLIB), s_pintWk.mpFuncLib);
 	}
 	return true;
 }

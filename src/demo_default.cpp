@@ -202,6 +202,8 @@ static void init() {
 			s_roamProgKind = RoamProgKind::PLOP;
 		} else if (nxCore::str_eq(pRoamProgOpt, "qjs")) {
 			s_roamProgKind = RoamProgKind::QJS;
+		} else if (nxCore::str_eq(pRoamProgOpt, "lua")) {
+			s_roamProgKind = RoamProgKind::LUA;
 		}
 	}
 
@@ -216,6 +218,9 @@ static void init() {
 	} else if (s_roamProgKind == RoamProgKind::QJS) {
 		ctrlFunc = roam_ctrl_qjs;
 		init_roam_qjs();
+	} else if (s_roamProgKind == RoamProgKind::LUA) {
+		ctrlFunc = roam_ctrl_lua;
+		init_roam_lua();
 	}
 
 	//init_single_char(ctrlFunc);
@@ -238,6 +243,8 @@ static void init() {
 		nxCore::dbg_msg("PLOP");
 	} else if (s_roamProgKind == RoamProgKind::QJS) {
 		nxCore::dbg_msg("QJS");
+	} else if (s_roamProgKind == RoamProgKind::LUA) {
+		nxCore::dbg_msg("LUA");
 	} else {
 		nxCore::dbg_msg("NATIVE");
 	}
@@ -537,6 +544,8 @@ static void reset() {
 		reset_roam_pint();
 	} else if (s_roamProgKind == RoamProgKind::QJS) {
 		reset_roam_qjs();
+	} else if (s_roamProgKind == RoamProgKind::LUA) {
+		reset_roam_lua();
 	}
 }
 

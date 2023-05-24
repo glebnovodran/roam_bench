@@ -2,11 +2,16 @@
 #	define ROAM_QJS 0
 #endif
 
+#ifndef ROAM_LUA
+#	define ROAM_LUA 1
+#endif
+
 enum class RoamProgKind {
 	NATIVE,
 	PINT,
 	PLOP,
-	QJS
+	QJS,
+	LUA
 };
 
 bool is_mood_enabled();
@@ -38,3 +43,11 @@ void init_roam_qjs();
 void reset_roam_qjs();
 
 void roam_ctrl_qjs(SmpChar* pChar);
+
+// Lua
+
+void init_roam_lua();
+
+void reset_roam_lua();
+
+void roam_ctrl_lua(SmpChar* pChar);
