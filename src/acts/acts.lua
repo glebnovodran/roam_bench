@@ -1,3 +1,4 @@
+
 function lerp(a, b, t)
 	return a + (b - a)*t
 end
@@ -55,7 +56,7 @@ end
 function WALK()
 	newAct = ""
 	newDuration = 0.0
-	wallReset = false
+	wallReset = false	
 	objTouchDT = obj_touch_duration_secs()
 	wallTouchDT = wall_touch_duration_secs()
 	if check_act_timeout() or objTouchDT > 0.2 or wallTouchDT > 0.25 then
@@ -95,10 +96,10 @@ function RETREAT()
 	newDuration = 0.0
 	wallReset = false
 	wallTouchDT = wall_touch_duration_secs()
-	if check_act_timeout() or wallTouchDT > 0.1 {
+	if check_act_timeout() or wallTouchDT > 0.1 then
 		newAct = "STAND"
 		newDuration = 2.0
-	}
+	end
 
 	return newAct, newDuration, wallReset
 end
