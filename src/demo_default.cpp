@@ -20,6 +20,86 @@ static bool s_moodVis = false;
 
 static RoamProgKind s_roamProgKind = RoamProgKind::NATIVE;
 
+struct CtrlExecStats {
+	double sum;
+	double avg;
+	int nchr;
+};
+
+static bool ctrldt_obj_func(ScnObj* pObj, void* pWkMem) {
+	SmpChar* pChr = SmpCharSys::char_from_obj(pObj);
+	if (pChr) {
+		CtrlExecStats* pWk = reinterpret_cast<CtrlExecStats*>(pWkMem);
+		if (pWk) {
+			pWk->sum += pChr->mCtrlDt;
+			pWk->nchr++;
+		}
+	}
+	return true;
+}
+
+static CtrlExecStats calc_ctrldt() {
+	CtrlExecStats wk;
+	wk.nchr = 0;
+	wk.sum = 0.0;
+	Scene::for_each_obj(ctrldt_obj_func, &wk);
+	wk.avg = nxCalc::div0(wk.sum, double(wk.nchr));
+	return wk;
+}
+
+static double s_ctrldt_smps[30];
+static int s_ctrldt_idx = 0;
+static double s_ctrldtAvg = -1.0;
+
+static void draw_2d_ctrl_stats() {
+	if (s_ctrldt_idx >= XD_ARY_LEN(s_ctrldt_smps)) {
+		double ctrldtAvg = 0.0;
+		for (size_t i = 0; i < XD_ARY_LEN(s_ctrldt_smps); ++i) {
+			ctrldtAvg += s_ctrldt_smps[i];
+		}
+		ctrldtAvg /= double(XD_ARY_LEN(s_ctrldt_smps));
+		s_ctrldtAvg = ctrldtAvg;
+		s_ctrldt_idx = 0;
+	}
+	CtrlExecStats ctrldt = calc_ctrldt();
+	s_ctrldt_smps[s_ctrldt_idx++] = ctrldt.sum;
+	if (s_ctrldtAvg < 0.0) return;
+
+	char str[512];
+	float sx = 10.3f;
+	float sy = 10.0f;
+	xt_float2 bpos[4];
+	xt_float2 btex[4];
+	btex[0].set(0.0f, 0.0f);
+	btex[1].set(1.0f, 0.0f);
+	btex[2].set(1.0f, 1.0f);
+	btex[3].set(0.0f, 1.0f);
+	float bx = 4.0f;
+	float by = 4.0f;
+	float bw = 280.0f;
+	float bh = 12.0f;
+	cxColor bclr(0.0f, 0.0f, 0.1f, 0.15f);
+	bpos[0].set(sx - bx, sy - by);
+	bpos[1].set(sx + bw + bx, sy - by);
+	bpos[2].set(sx + bw + bx, sy + bh + by);
+	bpos[3].set(sx - bx, sy + bh + by);
+	Scene::quad(bpos, btex, bclr);
+	const char* pCtrlProgStr = "?";
+	switch (s_roamProgKind) {
+		case RoamProgKind::NATIVE: pCtrlProgStr = "Native"; break;
+		case RoamProgKind::PINT: pCtrlProgStr = "Pint"; break;
+		case RoamProgKind::QJS: pCtrlProgStr = "QuickJS"; break;
+		case RoamProgKind::LUA: pCtrlProgStr = "Lua"; break;
+	}
+	XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg);
+	Scene::print(sx, sy, cxColor(0.75f, 0.4f, 0.1f, 1.0f), str);
+
+	if (OGLSys::is_dummy()) {
+		nxCore::dbg_msg("[\x1B[1m\x1B[46m\x1B[93m %s \x1B[0m]", str);
+	}
+}
+
+
 struct AVG_SAMPLES {
 	double* mpSmps;
 	int mNum;
@@ -456,6 +536,7 @@ static void draw_2d() {
 	if (OGLSys::is_dummy()) {
 		nxCore::dbg_msg("  %s \x1B[0m]   ", str);
 	}
+	draw_2d_ctrl_stats();
 }
 
 static void profile_start() {
