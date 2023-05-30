@@ -19,6 +19,7 @@ static float s_moodPeriod = -1.0f;
 static bool s_moodVis = false;
 
 static RoamProgKind s_roamProgKind = RoamProgKind::NATIVE;
+static int s_mode = 0;
 
 struct CtrlExecStats {
 	double sum;
@@ -90,6 +91,7 @@ static void draw_2d_ctrl_stats() {
 		case RoamProgKind::PINT: pCtrlProgStr = "Pint"; break;
 		case RoamProgKind::QJS: pCtrlProgStr = "QuickJS"; break;
 		case RoamProgKind::LUA: pCtrlProgStr = "Lua"; break;
+		default: break;
 	}
 	XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg);
 	Scene::print(sx, sy, cxColor(0.75f, 0.4f, 0.1f, 1.0f), str);
@@ -166,7 +168,6 @@ static void init_stage() {
 	}
 }
 
-#if 0
 static ScnObj* add_char(const SmpChar::Descr& descr, char charType, SmpChar::CtrlFunc& ctrlFunc);
 
 static void init_single_char(SmpChar::CtrlFunc& ctrlFunc) {
@@ -189,7 +190,6 @@ static void init_two_chars(SmpChar::CtrlFunc& ctrlFunc) {
 	pObj = add_char(descr, 'm', ctrlFunc);
 	pObj->set_world_quat_pos(nxQuat::from_degrees(0.0f, 0.0f, 0.0f), cxVec(x, 0.0f, 0.0f));
 }
-#endif
 
 static ScnObj* add_char(const SmpChar::Descr& descr, char charType, SmpChar::CtrlFunc& ctrlFunc) {
 	ScnObj* pObj = nullptr;
@@ -205,6 +205,14 @@ static void init_chars(SmpChar::CtrlFunc& ctrlFunc) {
 	SmpChar::Descr descr;
 	descr.reset();
 	bool disableSl = nxApp::get_bool_opt("scl_off", false);
+
+	if (s_mode == -1) {
+		init_single_char(ctrlFunc);
+		return;
+	} else if (s_mode == -2) {
+		init_two_chars(ctrlFunc);
+		return;
+	}
 
 	float x = -5.57f;
 	for (int i = 0; i < 10; ++i) {
@@ -246,8 +254,7 @@ static void init_chars(SmpChar::CtrlFunc& ctrlFunc) {
 		pos += add;
 	}
 
-	int mode = nxApp::get_int_opt("mode", 1);
-	if (mode == 1) {
+	if (s_mode == 1) {
 		cxVec pos(-8.0f, 0.0f, -2.0f);
 		cxVec add(0.75f, 0.0f, 0.0f);
 		cxQuat q = nxQuat::identity();
@@ -287,6 +294,7 @@ static void init() {
 		}
 	}
 
+	s_mode = nxApp::get_int_opt("mode", 1);
 	//Scene::alloc_global_heap(1024 * 1024 * 2);
 	Scene::alloc_local_heaps(1024 * 1024 * 2);
 	SmpCharSys::init();
@@ -303,8 +311,6 @@ static void init() {
 		init_roam_lua();
 	}
 
-	//init_single_char(ctrlFunc);
-	//init_two_chars(ctrlFunc);
 	init_chars(ctrlFunc);
 	init_stage();
 	s_execStopWatch.alloc(120);
