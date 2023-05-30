@@ -14,3 +14,5 @@ qjs/*
 !/qjs/qjs_build.sh
 lua/*
 !/lua/lua_build.sh
+wrench/*
+!/wrench/wrench_build.sh
