@@ -92,12 +92,14 @@ static struct RoamLuaWk {
 
 			size_t srcSize = 0;
 			mpProgSrc = load_lua_prog("acts", srcSize);
-			int luaErr = luaL_dostring(mpLua, mpProgSrc);
-			if (luaErr == LUA_OK) {
-				nxCore::dbg_msg("Lua prog run successfully\n");
-				mExecFlg = true;
-			} else {
-				nxCore::dbg_msg("Lua error: %d\n", luaErr);
+			if (mpProgSrc) {
+				int luaErr = luaL_dostring(mpLua, mpProgSrc);
+				if (luaErr == LUA_OK) {
+					nxCore::dbg_msg("Lua prog run successfully\n");
+					mExecFlg = true;
+				} else {
+					nxCore::dbg_msg("Lua error: %d\n", luaErr);
+				}
 			}
 		} else {
 			nxCore::dbg_msg("Failed to init Lua\n");
