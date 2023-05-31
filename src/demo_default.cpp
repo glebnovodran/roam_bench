@@ -49,7 +49,7 @@ static CtrlExecStats calc_ctrldt() {
 }
 
 static double s_ctrldt_smps[30];
-static int s_ctrldt_idx = 0;
+static uint32_t s_ctrldt_idx = 0;
 static double s_ctrldtAvg = -1.0;
 
 static void draw_2d_ctrl_stats() {
