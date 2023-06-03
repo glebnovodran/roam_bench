@@ -12,37 +12,7 @@
 #include "lauxlib.h"
 
 static char* load_lua_prog(const char* pName, size_t& srcSize) {
-	char* pProg = nullptr;
-	cxResourceManager* pRsrcMgr = Scene::get_rsrc_mgr();
-	const char* pDataPath = pRsrcMgr ? pRsrcMgr->get_data_path() : nullptr;
-
-	if (pName) {
-		char path[256];
-		char* pSrcPath = path;
-		size_t bufSize = sizeof(path);
-		size_t pathSize = (pDataPath ? nxCore::str_len(pDataPath) : 1) + 6 + nxCore::str_len(pName) + 5 + 1;
-		if (bufSize < pathSize) {
-			pSrcPath = reinterpret_cast<char*>(nxCore::mem_alloc(pathSize, "chr_luaprog_path"));
-			bufSize = pathSize;
-		}
-
-		XD_SPRINTF(XD_SPRINTF_BUF(pSrcPath, bufSize), "%s/%s/%s.lua", pDataPath ? pDataPath : ".", "acts", pName);
-		srcSize = 0;
-		pProg = reinterpret_cast<char*>(nxCore::bin_load(pSrcPath, &srcSize, false, true));
-		if (pProg && srcSize > 0) {
-			char* pProgCstr = (char*)nxCore::mem_alloc(srcSize + 1, "LuaProgSrc");
-			if (pProgCstr) {
-				nxCore::mem_copy(pProgCstr, pProg, srcSize);
-				pProgCstr[srcSize] = 0;
-				nxCore::bin_unload(pProg);
-				pProg = pProgCstr;
-			}
-		}
-		if (pSrcPath != path) {
-			nxCore::mem_free(pSrcPath);
-		}
-	}
-	return pProg;
+	return Scene::load_text_cstr(pName, &srcSize, "acts", "lua");
 }
 
 static ScnObj* luaifc_get_active_obj();
@@ -111,9 +81,10 @@ static struct RoamLuaWk {
 			lua_close(mpLua);
 			mpLua = nullptr;
 		}
-		if (mpProgSrc) {
-			nxCore::bin_unload(mpProgSrc);
-		}
+
+		Scene::unload_text_cstr(mpProgSrc);
+		mpProgSrc = nullptr;
+
 		if (mpLock) {
 			nxSys::lock_destroy(mpLock);
 			mpLock = nullptr;

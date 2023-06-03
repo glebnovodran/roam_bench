@@ -69,6 +69,8 @@ static JSCFunctionListEntry s_ifc_func_exps[] = {
 };
 
 static char* load_js_prog(const char* pName, size_t& srcSize) {
+	return Scene::load_text_cstr(pName, &srcSize, "acts", "js");
+/*
 	char* pProg = nullptr;
 	cxResourceManager* pRsrcMgr = Scene::get_rsrc_mgr();
 	const char* pDataPath = pRsrcMgr ? pRsrcMgr->get_data_path() : nullptr;
@@ -100,6 +102,7 @@ static char* load_js_prog(const char* pName, size_t& srcSize) {
 		}
 	}
 	return pProg;
+*/
 }
 
 static struct JSFunc {
@@ -187,19 +190,20 @@ static struct ROAM_QJS_WK {
 		if (mpRT) {
 			JS_RunGC(mpRT);
 		}
+
 		if (mpCtx) {
 			JS_FreeContext(mpCtx);
 			mpCtx = nullptr;
 		}
+
 		if (mpRT) {
 			// commented to avoid assertion fired by QJS
 			// JS_FreeRuntime(mpRT);
 			// mpRT = nullptr;
 		}
-		if (mpProgSrc) {
-			nxCore::mem_free(mpProgSrc);
-			mpProgSrc = nullptr;
-		}
+
+		Scene::unload_text_cstr(mpProgSrc);
+		mpProgSrc = nullptr;
 		mProgSize = 0;
 
 		if (mpLock) {
