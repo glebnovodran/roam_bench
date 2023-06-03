@@ -401,7 +401,7 @@ $CXX -std=c++11 -ggdb $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
 
 if [ -f "$PROG_PATH" ]; then
 	printf "#!/bin/sh\n\n" > $RUN_PATH
-	printf "./$PROG_PATH -nwrk:0 \$*\n" >> $RUN_PATH
+	printf "./$PROG_PATH -nwrk:0 -mood_period:10 \$*\n" >> $RUN_PATH
 	chmod +x $RUN_PATH
 	printf "$FMT_B_GREEN""Success""$FMT_OFF""$FMT_BOLD""!!""$FMT_OFF\n"
 else
