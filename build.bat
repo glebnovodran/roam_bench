@@ -16,6 +16,10 @@ set ACTS_DIR=acts
 set PROG_PATH=%PROG_DIR%\%PROG_NAME%.exe
 set RUN_PATH=run.bat
 
+set PDB_PATH="%PROG_DIR%\%PROG_NAME%.pdb"
+set ILK_PATH="%PROG_DIR%\%PROG_NAME%.ilk"
+set LST_PATH="%PROG_DIR%\%PROG_NAME%.lst"
+
 if not exist %PROG_DIR% mkdir %PROG_DIR%
 
 echo   ~ Compiling Roam-Benchmark for Windows ~
@@ -41,18 +45,35 @@ if not x%TDM_HOME%==x (
 )
 echo [Setting up compiler tools...]
 if not exist %TDM_DIR%\bin (
-	echo ^^! Please install TDM-GCC tools:
-	echo ^^! https://jmeubank.github.io/tdm-gcc/download/
-	echo ^^! To build:
-	echo ^^! cmd /c "set TDM_HOME=^<path^>&&build.bat"
-	exit /B -1
+	if x%VC_CFG%==x (
+		echo ^^! Please install TDM-GCC tools:
+		echo ^^! https://jmeubank.github.io/tdm-gcc/download/
+		echo ^^! To build:
+		echo ^^! cmd /c "set TDM_HOME=^<path^>&&build.bat"
+		exit /B -1
+	)
 )
 set TDM_BIN=%TDM_DIR%\bin
 set TDM_GCC=%TDM_BIN%\gcc.exe
 set TDM_GPP=%TDM_BIN%\g++.exe
 set TDM_MAK=%TDM_BIN%\mingw32-make.exe
 set TDM_WRS=%TDM_BIN%\windres.exe
-echo [C++ compiler path: %TDM_GPP%]
+if x%VC_CFG%==x (
+	echo [C++ compiler path: %TDM_GPP%]
+) else (
+	echo Configuring MSVC env...
+	call %VC_CFG%
+	if x!VC_CXX!==x (
+		echo Path to MSVC not specified
+		exit /B -1
+	)
+	if not exist "!VC_CXX!" (
+		echo ^^! MSVC tools not found ^^!
+		exit /B -1
+	)
+	echo [C++ compiler path: !VC_CXX!]
+)
+
 
 set _CSCR_=cscript.exe /nologo
 
@@ -109,13 +130,38 @@ if exist %PROG_PATH% (
 
 if exist %RUN_PATH% del %RUN_PATH%
 
+if exist %PDB_PATH% (
+	echo Cleaning %PDB_PATH%.
+	del %PDB_PATH%
+)
 
-set SRC_FILES=%PINT_DIR%\pint.cpp
+if exist %ILK_PATH% (
+	echo Cleaning %ILK_PATH%.
+	del %ILK_PATH%
+)
+
+if exist %LST_PATH% (
+	echo Cleaning %LST_PATH%.
+	del %LST_PATH%
+)
+
+
+set SRC_FILES=
+set OBJ_FILES=
 for /f %%i in ('dir /b %SRC_DIR%\*.cpp') do (
-	set SRC_FILES=!SRC_FILES! %SRC_DIR%/%%i
+	set SRC=%%i
+	set SRC_FILES=!SRC_FILES! %SRC_DIR%/!SRC!
+	set OBJ_FILES=!OBJ_FILES! !SRC:~0,-3!obj
 )
 for /f %%i in ('dir /b %XCORE_DIR%\*.cpp') do (
-	set SRC_FILES=!SRC_FILES! %XCORE_DIR%/%%i
+	set SRC=%%i
+	set SRC_FILES=!SRC_FILES! %XCORE_DIR%/!SRC!
+	set OBJ_FILES=!OBJ_FILES! !SRC:~0,-3!obj
+)
+for /f %%i in ('dir /b %PINT_DIR%\*.cpp') do (
+	set SRC=%%i
+	set SRC_FILES=!SRC_FILES! %PINT_DIR%/!SRC!
+	set OBJ_FILES=!OBJ_FILES! !SRC:~0,-3!obj
 )
 
 set BUILD_OPTS=%*
@@ -124,14 +170,24 @@ rem -O3 -flto
 set XCORE_FLAGS=-DOGLSYS_ES=0 -DOGLSYS_CL=0 -DXD_TSK_NATIVE=1 -DSCN_CMN_PKG_NAME=\"common\"
 set CPP_OPTS=%CPP_OFLGS% -std=c++11 -ggdb -Wno-psabi -Wno-deprecated-declarations
 set LNK_OPTS=-l gdi32 -l ole32 -l windowscodecs
+set INC_PATHS=-I %INC_DIR% -I %XCORE_DIR% -I %PINT_DIR% -I %SRC_DIR%
 echo [Compiling %PROG_PATH%...]
-%TDM_GPP% %CPP_OPTS% %XCORE_FLAGS% -I %INC_DIR% -I %XCORE_DIR% -I %PINT_DIR% -I %SRC_DIR% %VEMA_OPTS% %SRC_FILES% -o %PROG_PATH% %LNK_OPTS% %BUILD_OPTS%
+if x!VC_CXX!==x (
+	%TDM_GPP% %CPP_OPTS% %XCORE_FLAGS% %INC_PATHS% %SRC_FILES% -o %PROG_PATH% %LNK_OPTS% %BUILD_OPTS%
+	rem %TDM_BIN%\objdump.exe -M intel -d -C %PROG_PATH% > %PROG_DIR%\%PROG_NAME%.txt
+	rem %TDM_BIN%\strip.exe %PROG_PATH%
+) else (
+	set VCXX_OPTS=/O2 /arch:SSE2 /GL /Gy /Zi /Gm- /Oi /Oy /Zc:inline  /Zc:forScope /MT /EHsc /GS- /fp:fast /DNDEBUG /D_CONSOLE  /D_UNICODE /DUNICODE
+	set VCLNK_OPTS=/DYNAMICBASE:NO "kernel32.lib" "user32.lib" "gdi32.lib" "ole32.lib" "windowscodecs.lib"
+	!VC_CXX! !VCXX_OPTS! %XCORE_FLAGS% %INC_PATHS% %SRC_FILES% %BUILD_OPTS% /Fe%PROG_PATH% /Fd%PDB_PATH% !VCLNK_OPTS!
+	rem !VC_DIS! %PROG_PATH% > %PROG_DIR%\%PROG_NAME%.txt
+	del /Q %OBJ_FILES%
+)
+
 if exist %PROG_PATH% (
 	echo rem roam-benchmark > %RUN_PATH%
 	echo %PROG_PATH% -nwrk:0 -mood_period:10 %%* >> %RUN_PATH%
 	echo Success^^!
-	rem %TDM_BIN%\objdump.exe -M intel -d -C %PROG_PATH% > %PROG_DIR%\%PROG_NAME%.txt
-	rem %TDM_BIN%\strip.exe %PROG_PATH%
 ) else (
 	echo Failure :(
 )
