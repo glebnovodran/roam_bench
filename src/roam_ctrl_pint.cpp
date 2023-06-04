@@ -32,30 +32,10 @@ static struct ActPintProg {
 };
 
 static char* load_prog(const char* pName, size_t& srcSize) {
-	char* pProg = nullptr;
-	cxResourceManager* pRsrcMgr = Scene::get_rsrc_mgr();
-	const char* pDataPath = pRsrcMgr ? pRsrcMgr->get_data_path() : nullptr;
-	if (pName) {
-		char path[256];
-		char* pSrcPath = path;
-		size_t bufSize = sizeof(path);
-		size_t pathSize = (pDataPath ? nxCore::str_len(pDataPath) : 1) + 6 + nxCore::str_len(pName) + 5 + 1;
-		if (bufSize < pathSize) {
-			pSrcPath = reinterpret_cast<char*>(nxCore::mem_alloc(pathSize, "chr_prog_path"));
-			bufSize = pathSize;
-		}
-
-		XD_SPRINTF(XD_SPRINTF_BUF(pSrcPath, bufSize), "%s/%s/%s.pint", pDataPath ? pDataPath : ".", "acts", pName);
-		srcSize = 0;
-		pProg = reinterpret_cast<char*>(nxCore::bin_load(pSrcPath, &srcSize, false, true));
-		if (pProg && srcSize > 0) {
-			if (nxApp::get_bool_opt("pint_cache", false)) {
-				Pint::cache(pProg, srcSize);
-			}
-		}
-
-		if (pSrcPath != path) {
-			nxCore::mem_free(pSrcPath);
+	char* pProg = reinterpret_cast<char*>(Scene::load_bin_file(pName, &srcSize, "acts", "pint"));
+	if (pProg && srcSize > 0) {
+		if (nxApp::get_bool_opt("pint_cache", false)) {
+			Pint::cache(pProg, srcSize);
 		}
 	}
 	return pProg;
@@ -63,7 +43,7 @@ static char* load_prog(const char* pName, size_t& srcSize) {
 
 static void free_pint_prog(PintProg& prog) {
 	if (prog.pSrc) {
-		nxCore::bin_unload(prog.pSrc);
+		Scene::unload_bin_file(prog.pSrc);
 		prog.pSrc = nullptr;
 	}
 }
