@@ -91,6 +91,7 @@ static void draw_2d_ctrl_stats() {
 		case RoamProgKind::PINT: pCtrlProgStr = "Pint"; break;
 		case RoamProgKind::QJS: pCtrlProgStr = "QuickJS"; break;
 		case RoamProgKind::LUA: pCtrlProgStr = "Lua"; break;
+		case RoamProgKind::WRENCH: pCtrlProgStr = "wrench"; break;
 		default: break;
 	}
 	XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg);
@@ -291,6 +292,8 @@ static void init() {
 			s_roamProgKind = RoamProgKind::QJS;
 		} else if (nxCore::str_eq(pRoamProgOpt, "lua")) {
 			s_roamProgKind = RoamProgKind::LUA;
+		} else if (nxCore::str_eq(pRoamProgOpt, "wrench")) {
+			s_roamProgKind = RoamProgKind::WRENCH;
 		}
 	}
 
@@ -309,6 +312,9 @@ static void init() {
 	} else if (s_roamProgKind == RoamProgKind::LUA) {
 		ctrlFunc = roam_ctrl_lua;
 		init_roam_lua();
+	} else if (s_roamProgKind == RoamProgKind::WRENCH) {
+		ctrlFunc = roam_ctrl_wrench;
+		init_roam_wrench();
 	}
 
 	init_chars(ctrlFunc);
@@ -633,6 +639,8 @@ static void reset() {
 		reset_roam_qjs();
 	} else if (s_roamProgKind == RoamProgKind::LUA) {
 		reset_roam_lua();
+	} else if (s_roamProgKind == RoamProgKind::WRENCH) {
+		reset_roam_wrench();
 	}
 }
 

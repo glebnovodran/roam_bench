@@ -6,12 +6,16 @@
 #	define ROAM_LUA 0
 #endif
 
+#ifndef ROAM_WRENCH
+#	define ROAM_WRENCH 0
+#endif
 enum class RoamProgKind {
 	NATIVE,
 	PINT,
 	PLOP,
 	QJS,
-	LUA
+	LUA,
+	WRENCH
 };
 
 bool is_mood_enabled();
@@ -51,3 +55,12 @@ void init_roam_lua();
 void reset_roam_lua();
 
 void roam_ctrl_lua(SmpChar* pChar);
+
+// wrench
+
+
+void init_roam_wrench();
+
+void reset_roam_wrench();
+
+void roam_ctrl_wrench(SmpChar* pChar);
