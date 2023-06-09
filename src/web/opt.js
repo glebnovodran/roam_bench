@@ -14,6 +14,18 @@ if (pageParams.get("pint") !== null) {
 	Module.arguments.push("-roamprog:pint");
 }
 
+if (pageParams.get("wrench") !== null) {
+	Module.arguments.push("-roamprog:wrench");
+}
+
+if (pageParams.get("lua") !== null) {
+	Module.arguments.push("-roamprog:lua");
+}
+
+if (pageParams.get("qjs") !== null) {
+	Module.arguments.push("-roamprog:qjs");
+}
+
 if (pageParams.get("small") !== null) {
 	Module.arguments.push("-w:480");
 	Module.arguments.push("-h:320");
@@ -33,4 +45,7 @@ if (pageParams.get("lowq") !== null) {
 	Module.arguments.push("-msaa:4");
 }
 
-
+if (pageParams.get("exerep") !== null) {
+	Module.arguments.push("-exerep:5");
+	Module.arguments.push("-speed:0.2");
+}
