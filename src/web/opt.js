@@ -7,7 +7,8 @@ Module.arguments = [
 	"-nwrk:0",
 	"-adapt:1",
 	"-data:bin/data",
-	"-glsl_echo:1"
+	"-glsl_echo:1",
+	"-mood_period:10"
 ];
 
 if (pageParams.get("pint") !== null) {
