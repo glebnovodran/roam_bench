@@ -51,6 +51,9 @@ static CtrlExecStats calc_ctrldt() {
 static double s_ctrldt_smps[30];
 static uint32_t s_ctrldt_idx = 0;
 static double s_ctrldtAvg = -1.0;
+static double s_ctrldt_avg_smps[10];
+static uint32_t s_ctrldt_avg_idx = 0;
+static double s_ctrldtAvgAvg = -1.0;
 
 static void draw_2d_ctrl_stats() {
 	if (s_ctrldt_idx >= XD_ARY_LEN(s_ctrldt_smps)) {
@@ -61,6 +64,17 @@ static void draw_2d_ctrl_stats() {
 		ctrldtAvg /= double(XD_ARY_LEN(s_ctrldt_smps));
 		s_ctrldtAvg = ctrldtAvg;
 		s_ctrldt_idx = 0;
+		if (s_ctrldt_avg_idx < XD_ARY_LEN(s_ctrldt_avg_smps)) {
+			s_ctrldt_avg_smps[s_ctrldt_avg_idx++] = ctrldtAvg;
+		} else {
+			double avgAvg = 0.0f;
+			for (size_t i = 0; i < XD_ARY_LEN(s_ctrldt_avg_smps); ++i) {
+				avgAvg += s_ctrldt_avg_smps[i];
+			}
+			avgAvg /= double(XD_ARY_LEN(s_ctrldt_avg_smps));
+			s_ctrldtAvgAvg = avgAvg;
+			s_ctrldt_avg_idx = 0;
+		}
 	}
 	CtrlExecStats ctrldt = calc_ctrldt();
 	s_ctrldt_smps[s_ctrldt_idx++] = ctrldt.sum;
@@ -77,7 +91,7 @@ static void draw_2d_ctrl_stats() {
 	btex[3].set(0.0f, 1.0f);
 	float bx = 4.0f;
 	float by = 4.0f;
-	float bw = 280.0f;
+	float bw = 320.0f;
 	float bh = 12.0f;
 	cxColor bclr(0.0f, 0.0f, 0.1f, 0.15f);
 	bpos[0].set(sx - bx, sy - by);
@@ -94,7 +108,11 @@ static void draw_2d_ctrl_stats() {
 		case RoamProgKind::WRENCH: pCtrlProgStr = "wrench"; break;
 		default: break;
 	}
-	XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg);
+	if (s_ctrldtAvgAvg > 0.0) {
+		XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f (%.2f) micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg, s_ctrldtAvgAvg);
+	} else {
+		XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg);
+	}
 	Scene::print(sx, sy, cxColor(0.75f, 0.4f, 0.1f, 1.0f), str);
 
 	if (OGLSys::is_dummy()) {
