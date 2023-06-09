@@ -8,7 +8,8 @@ Module.arguments = [
 	"-adapt:1",
 	"-data:bin/data",
 	"-glsl_echo:1",
-	"-mood_period:10"
+	"-mood_period:10",
+	"-avg_smps:10"
 ];
 
 if (pageParams.get("pint") !== null) {
