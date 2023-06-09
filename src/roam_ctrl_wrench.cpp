@@ -13,9 +13,6 @@ static char* load_wrench_prog(const char* pName, size_t& srcSize) {
 	return Scene::load_text_cstr(pName, &srcSize, "acts", "w");
 }
 
-static ScnObj* wifc_get_active_obj();
-static SmpChar* wifc_get_active_char();
-
 static void wifc_glb_rng_next(WRState* w, const WRValue* argv, const int argn, WRValue& retVal, void* usr);
 static void wifc_glb_rng_f01(WRState* w, const WRValue* argv, const int argn, WRValue& retVal, void* usr);
 static void wifc_check_act_timeout(WRState* w, const WRValue* argv, const int argn, WRValue& retVal, void* usr);
@@ -26,7 +23,7 @@ static void wifc_get_mood_arg(WRState* w, const WRValue* argv, const int argn, W
 static struct ActWrenchProg {
 	const char* pFuncName;
 } s_actProgs[] {
-	"STAND", "TURN_L", "TURN_R", "WALK", "RETREAT", "RUN"
+	{ "STAND" }, { "TURN_L" }, { "TURN_R" }, { "WALK" }, { "RETREAT" }, { "RUN" }
 };
 
 static struct RoamWrenchWk {
@@ -111,6 +108,43 @@ static struct RoamWrenchWk {
 				pChar->mpObj->set_base_color_scl(moodc, moodc, moodc);
 			}
 		}
+
+		int32_t nowAct = pChar->mAction;
+		if (nowAct >= int32_t(XD_ARY_LEN(s_actProgs)) || nowAct < 0) {
+			nxCore::dbg_msg("wrench: unknown act %d\n", nowAct);
+			return;
+		}
+
+		int32_t newAct = -1;
+		double newActDuration = 0.0;
+		bool wallTouchReset = false;
+
+		WRFunction* pActFunc = wr_getFunction(mpCtx, s_actProgs[nowAct].pFuncName);
+		if (pActFunc) {
+			int err = wr_callFunction(mpState, mpCtx, pActFunc, nullptr, 0);
+			if (err == WR_ERR_None) {
+				WRValue* pVal = wr_returnValueFromLastCall(mpState);
+				if (pVal) {
+					uint32_t aryLen = 0;
+					char aryType = 0;
+					WRValue* pAryVals = reinterpret_cast<WRValue*>(pVal->array(&aryLen, &aryType));
+					const char* pNewActName = pAryVals[0].c_str();
+					if (pNewActName) {
+						newAct = SmpCharSys::act_id_from_name(pNewActName);
+					}
+					newActDuration = pAryVals[1].asFloat();
+					wallTouchReset = pAryVals[2].asInt();
+
+					if (newAct >=0) {
+						pChar->change_act(newAct, newActDuration);
+					}
+
+					if (wallTouchReset) {
+						pChar->reset_wall_touch();
+					}
+				}
+			}
+		}
 	}
 
 	ScnObj* get_active_obj() {
@@ -119,6 +153,7 @@ static struct RoamWrenchWk {
 	SmpChar* get_active_char() {
 		return SmpCharSys::char_from_obj(get_active_obj());
 	}
+
 	float char_mood_calc(SmpChar* pChar) {
 		float mood = 0.0f;
 		WRFunction* pMoodFunc = wr_getFunction(mpCtx, "char_mood_calc");
@@ -137,14 +172,7 @@ static struct RoamWrenchWk {
 	}
 
 } s_wrench;
-/*
-static ScnObj* wifc_get_active_obj() {
-	return s_wrench.mpActiveObj;
-}
-static SmpChar* wifc_get_active_char() {
-	return SmpCharSys::char_from_obj(wifc_get_active_obj());
-}
-*/
+
 static void wifc_glb_rng_next(WRState* w, const WRValue* argv, const int argn, WRValue& retVal, void* usr) {
 	uint64_t rnd = Scene::glb_rng_next();
 	rnd &= 0xffffffff;

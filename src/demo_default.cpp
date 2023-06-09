@@ -337,6 +337,8 @@ static void init() {
 		nxCore::dbg_msg("QJS");
 	} else if (s_roamProgKind == RoamProgKind::LUA) {
 		nxCore::dbg_msg("LUA");
+	} else if (s_roamProgKind == RoamProgKind::WRENCH) {
+		nxCore::dbg_msg("WRENCH");
 	} else {
 		nxCore::dbg_msg("NATIVE");
 	}
