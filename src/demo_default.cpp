@@ -116,7 +116,7 @@ static void draw_2d_ctrl_stats() {
 	Scene::print(sx, sy, cxColor(0.75f, 0.4f, 0.1f, 1.0f), str);
 
 	if (OGLSys::is_dummy()) {
-		nxCore::dbg_msg("[\x1B[1m\x1B[46m\x1B[93m %s \x1B[0m]", str);
+		nxCore::dbg_msg("\n[\x1B[1m\x1B[46m\x1B[93m %s \x1B[0m]\x1B[F", str);
 	}
 }
 
