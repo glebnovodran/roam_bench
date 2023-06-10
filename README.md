@@ -1,6 +1,6 @@
 # ~ Character control benchmark ~
 
-The project goal is to measure relative performance of different character scripting methods in a game type scenario.
+The project goal is to measure relative performance of different character scripting methods in a game-type scenario.
 
 ## 'Built-in' control methods.
 
@@ -14,18 +14,20 @@ These are based on my own code.
 
 These are implemented with external libraries.
 
-- JavaScript on **QuickJS**. [QuickJS](https://github.com/bellard/quickjs/) is a Javascript engine. It is easily embeddable and relatively lightwieght and, as such, is a good way to test JS implemented via bytecode interpreter in an aforementioned scenario.
+- JavaScript on **QuickJS**. [QuickJS](https://github.com/bellard/quickjs/) is a Javascript engine. It is easily embeddable and relatively lightweight and, as such, is a good way to test JS implemented via bytecode interpreter in an aforementioned scenario.
 
 - **Lua** is a [scripting language](http://www.lua.org/) of choice for many game projects. Its goal to provide a performance standard to achieve.
 
 - **wrench** is a recently developed embeddable scripting [language](https://www.northarc.com/wrench/www/). Its main purpose is to be used on embedded platforms with very limited resources. For such scenarios it seems to be on par or faster than Lua. So, it is interesting to see it in the game-programming context on different platforms.
 
 ## Quick compilation on Linux. ##
-Execute ```./build_all.sh ``` . It will build the project and generate run.sh.
+Execute ```./build_all.sh ``` . It will build the project and generate run.sh launcher script.
 
 Executing run.sh will display something like:
 
 ![info](https://glebnovodran.github.io/roam/roam_info.jpg)
+
+By default, if launched with ```./run.sh``` , it will use 'Native' control method. To use another control method, for example Lua, use ```./run.sh -roamprog:lua```
 
 Here is how to interpret the information on the screen:
 
