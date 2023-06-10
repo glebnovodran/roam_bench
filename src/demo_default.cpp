@@ -54,8 +54,10 @@ static double s_ctrldtAvg = -1.0;
 static double s_ctrldt_avg_smps[10];
 static uint32_t s_ctrldt_avg_idx = 0;
 static double s_ctrldtAvgAvg = -1.0;
+static bool s_ctrdtInfoEnabled = true;
 
 static void draw_2d_ctrl_stats() {
+	if (!s_ctrdtInfoEnabled) return;
 	if (s_ctrldt_idx >= XD_ARY_LEN(s_ctrldt_smps)) {
 		double ctrldtAvg = 0.0;
 		for (size_t i = 0; i < XD_ARY_LEN(s_ctrldt_smps); ++i) {
@@ -91,7 +93,7 @@ static void draw_2d_ctrl_stats() {
 	btex[3].set(0.0f, 1.0f);
 	float bx = 4.0f;
 	float by = 4.0f;
-	float bw = 320.0f;
+	float bw = 330.0f;
 	float bh = 12.0f;
 	cxColor bclr(0.0f, 0.0f, 0.1f, 0.15f);
 	bpos[0].set(sx - bx, sy - by);
@@ -373,6 +375,8 @@ static void init() {
 	s_moodPeriod = nxApp::get_float_opt("mood_period", -1.0f);
 	nxCore::dbg_msg("mood period: %f\n", s_moodPeriod);
 	s_moodVis = nxApp::get_bool_opt("mood_vis", false);
+
+	s_ctrdtInfoEnabled = nxApp::get_bool_opt("ctrldt_info", true);
 }
 
 static struct ViewWk {
