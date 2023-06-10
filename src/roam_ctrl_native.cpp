@@ -32,6 +32,8 @@ void roam_ctrl_native(SmpChar* pChar) {
 		}
 	}
 
+	if (is_roamctrl_disabled()) return;
+
 	double objTouchDT = pChar->get_obj_touch_duration_secs();
 	double wallTouchDT = pChar->get_wall_touch_duration_secs();
 	switch (pChar->mAction) {

@@ -109,6 +109,8 @@ static struct RoamWrenchWk {
 			}
 		}
 
+		if (is_roamctrl_disabled()) return;
+
 		int32_t nowAct = pChar->mAction;
 		if (nowAct >= int32_t(XD_ARY_LEN(s_actProgs)) || nowAct < 0) {
 			nxCore::dbg_msg("wrench: unknown act %d\n", nowAct);

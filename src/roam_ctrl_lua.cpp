@@ -117,6 +117,8 @@ static struct RoamLuaWk {
 			}
 		}
 
+		if (is_roamctrl_disabled()) return;
+
 		int32_t nowAct = pChar->mAction;
 		if (nowAct >= XD_ARY_LEN(s_actProgs) || nowAct < 0) {
 			nxCore::dbg_msg("Lua: unknown act %d\n", nowAct);

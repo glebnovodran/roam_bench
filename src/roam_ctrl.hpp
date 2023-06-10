@@ -22,6 +22,8 @@ bool is_mood_enabled();
 
 bool is_mood_visible();
 
+bool is_roamctrl_disabled();
+
 double calc_mood_arg(double nowTime);
 
 // Native

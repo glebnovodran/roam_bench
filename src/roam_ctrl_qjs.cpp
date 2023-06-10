@@ -218,6 +218,8 @@ static struct ROAM_QJS_WK {
 			}
 		}
 
+		if (is_roamctrl_disabled()) return;
+
 		int32_t nowAct = pChar->mAction;
 		if (nowAct < 0 || nowAct >= XD_ARY_LEN(s_actFuncs)) {
 			nxCore::dbg_msg("QJS: unknown act %d\n", nowAct);

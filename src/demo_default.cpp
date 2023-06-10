@@ -20,6 +20,7 @@ static bool s_moodVis = false;
 
 static RoamProgKind s_roamProgKind = RoamProgKind::NATIVE;
 static int s_mode = 0;
+static bool s_roamctrlDisabled = false;
 
 struct CtrlExecStats {
 	double sum;
@@ -318,6 +319,7 @@ static void init() {
 	}
 
 	s_mode = nxApp::get_int_opt("mode", 1);
+	s_roamctrlDisabled = nxApp::get_bool_opt("roamctrl_disable", false);
 	//Scene::alloc_global_heap(1024 * 1024 * 2);
 	Scene::alloc_local_heaps(1024 * 1024 * 2);
 	SmpCharSys::init();
@@ -678,6 +680,10 @@ bool is_mood_enabled() {
 
 bool is_mood_visible() {
 	return s_moodVis;
+}
+
+bool is_roamctrl_disabled() {
+	return s_roamctrlDisabled;
 }
 
 double calc_mood_arg(double nowTime) {

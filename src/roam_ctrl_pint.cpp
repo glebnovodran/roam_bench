@@ -256,6 +256,8 @@ void roam_ctrl_pint(SmpChar* pChar) {
 			}
 		}
 
+		if (is_roamctrl_disabled()) return;
+
 		Pint::interp(pSrc, srcSize, pCtx, pFuncLib);
 		pCtx->print_vars();
 		Pint::Value* pNewActVal = pCtx->var_val(pCtx->find_var("newActName"));
