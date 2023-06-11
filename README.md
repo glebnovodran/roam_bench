@@ -21,6 +21,10 @@ These are implemented with external libraries.
 - **wrench** is a recently developed embeddable scripting [language](https://www.northarc.com/wrench/www/). Its main purpose is to be used on embedded platforms with very limited resources. For such scenarios it seems to be on par or faster than Lua. So, it is interesting to see it in the game-programming context on different platforms.
 
 ## Quick compilation on Linux. ##
+
+Clone the project with
+<br>```git clone https://github.com/glebnovodran/roam_bench.git --depth 1```
+
 Execute ```./build_all.sh ``` . It will build the project and generate run.sh launcher script.
 
 Executing run.sh will display something like:
