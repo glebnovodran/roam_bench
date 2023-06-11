@@ -61,6 +61,9 @@ FMT_B_WHITE=${NO_FMT-"\e[97m"}
 FMT_B_WHITE_BG=${NO_FMT-"\e[107m"}
 FMT_OFF=${NO_FMT-"\e[0m"}
 
+LUA_LIB_PATH=lua/lua.a
+QJS_LIB_PATH=qjs/quickjs.a
+
 WEB_CXX=""
 WEB_BUILD=0
 WEB_WASM=0
@@ -84,6 +87,13 @@ if [ "$#" -gt 0 ]; then
 			CMK_FILE="CMakeLists.txt"
 			if [ -f $CMK_FILE ]; then
 				rm -f $CMK_FILE
+			fi
+			printf "$FMT_RED$FMT_BOLD""Removing external libs!""$FMT_OFF\n"
+			if [ -f $LUA_LIB_PATH ]; then
+				rm -f $LUA_LIB_PATH
+			fi
+			if [ -f $QJS_LIB_PATH ]; then
+				rm -f $QJS_LIB_PATH
 			fi
 			exit 0
 		;;
