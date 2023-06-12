@@ -8,17 +8,17 @@ These are based on my own code.
 
 - **Native** is a compiled [C++ code](https://github.com/glebnovodran/roam_bench/blob/main/src/roam_ctrl_native.cpp). Its goal is to provide the fastest possible timing for character control execution.
 
-- **pint** is a simple executable S-expression form. [**pint**](https://github.com/glebnovodran/proto-plop/tree/main/pint) is very slow (though still useful) and its goal is to provide worst case timing.
+- **pint** is a simple executable S-expression form. [**pint**](https://github.com/glebnovodran/proto-plop/tree/main/pint) is very slow (though still useful for my project needs) and its goal is to provide worst case timing.
 
 ## 'External' control methods.
 
 These are implemented with external libraries.
 
-- JavaScript on **QuickJS**. [QuickJS](https://github.com/bellard/quickjs/) is a Javascript engine. It is easily embeddable and relatively lightweight and, as such, is a good way to test JS implemented via bytecode interpreter in an aforementioned scenario.
+- [**QuickJS**](https://bellard.org/quickjs/) is a Javascript engine. It is easily embeddable and relatively lightweight and, as such, is a good way to test JS implemented via bytecode interpreter in an aforementioned scenario.
 
-- **Lua** is a [scripting language](http://www.lua.org/) of choice for many game projects. Its goal to provide a performance standard to achieve.
+- [**Lua**](http://www.lua.org/) is a scripting language of choice for many game projects. Its goal to provide a performance standard to achieve.
 
-- **wrench** is a recently developed embeddable scripting [language](https://www.northarc.com/wrench/www/). Its main purpose is to be used on embedded platforms with very limited resources. For such scenarios it seems to be on par or faster than Lua. So, it is interesting to see it in the game-programming context on different platforms.
+- [**wrench**](https://www.northarc.com/wrench/www/) is a recently developed embeddable scripting language. Its main purpose is to be used on embedded platforms with very limited resources. For such scenarios it seems to be on par or faster than Lua. So, it is interesting to see it in the game-programming context on different platforms.
 
 ## Quick compilation on Linux. ##
 
@@ -55,3 +55,5 @@ Here is how to interpret the information on the screen:
 Example results for all currently supported control methods:
 
 ![info](https://glebnovodran.github.io/roam/roam_all_res.jpg)
+
+Exact values, for various platforms differ, but the ratio is more or less the same.
