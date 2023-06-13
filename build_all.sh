@@ -1,5 +1,26 @@
 #!/bin/sh
 
+WEB_CC=0
+BUILD_WEB_MODE=""
+
+if [ "$#" -gt 0 ]; then
+	case $1 in
+		clean)
+			./build.sh clean
+			exit 0
+		;;
+		web)
+			WEB_CC=1
+			BUILD_WEB_MODE="web"
+			shift
+			if [ "$1" = "wasm" ]; then
+				BUILD_WEB_MODE="web wasm"
+				shift
+			fi
+		;;
+	esac
+fi
+
 DL_CMD=""
 
 if [ -x "`command -v curl`" ]; then
@@ -41,15 +62,24 @@ fi
 if [ ! -f lua/lua.a ]; then
 	printf "Building Lua...\n"
 	cd lua
-	./lua_build.sh -O3 -flto
+	if [ $WEB_CC -ne 0 ]; then
+		CC=emcc AR=emar ./lua_build.sh -O3 -flto
+	else
+		./lua_build.sh -O3 -flto
+	fi
 	cd ..
 fi
 
 if [ ! -f qjs/quickjs.a ]; then
 	printf "Building QuickJS...\n"
 	cd qjs
-	./qjs_build.sh -O3 -flto
+	if [ $WEB_CC -ne 0 ]; then
+		CC=emcc AR=emar ./qjs_build.sh -O3 -flto
+	else
+		./qjs_build.sh -O3 -flto
+	fi
 	cd ..
 fi
 
-./build.sh -I wrench/src wrench/src/wrench.cpp -DROAM_WRENCH=1 -DROAM_QJS=1 -DROAM_LUA=1 -I qjs/src qjs/quickjs.a -I lua/src lua/lua.a -O3 -flto=auto $*
+ROAM_FLAGS="-DROAM_WRENCH=1 -DROAM_QJS=1 -DROAM_LUA=1"
+./build.sh $BUILD_WEB_MODE -I wrench/src wrench/src/wrench.cpp $ROAM_FLAGS -I qjs/src qjs/quickjs.a -I lua/src lua/lua.a -O3 -flto=auto $*
