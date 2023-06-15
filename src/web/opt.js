@@ -51,3 +51,8 @@ if (pageParams.get("exerep") !== null) {
 	Module.arguments.push("-exerep:5");
 	Module.arguments.push("-speed:0.2");
 }
+
+modeVal = pageParams.get("mode");
+if (modeVal !== null) {
+	Module.arguments.push("-mode:" + modeVal);
+}
