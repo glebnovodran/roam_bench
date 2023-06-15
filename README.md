@@ -57,3 +57,7 @@ Example results for all currently supported control methods:
 ![info](https://glebnovodran.github.io/roam/roam_all_res.jpg)
 
 Exact values, for various platforms differ, but the ratio is more or less the same.
+
+
+You can run this benchmark inside web-browser here:
+https://glebnovodran.github.io/roam/rb_web.html
