@@ -2,6 +2,7 @@
 
 WEB_CC=0
 BUILD_WEB_MODE=""
+DUMMYGL_MODE=0
 
 if [ "$#" -gt 0 ]; then
 	case $1 in
@@ -19,8 +20,7 @@ if [ "$#" -gt 0 ]; then
 			fi
 		;;
 		dummygl)
-			ALT_LIBS=""
-			ALT_DEFS="-DDUMMY_GL"
+			DUMMYGL_MODE=1
 			shift
 		;;
 	esac
@@ -87,4 +87,10 @@ if [ ! -f qjs/quickjs.a ]; then
 fi
 
 ROAM_FLAGS="-DROAM_WRENCH=1 -DROAM_QJS=1 -DROAM_LUA=1"
-./build.sh $BUILD_WEB_MODE -I wrench/src wrench/src/wrench.cpp $ROAM_FLAGS -I qjs/src qjs/quickjs.a -I lua/src lua/lua.a -O3 -flto=auto $*
+DEP_OPTS="-I wrench/src wrench/src/wrench.cpp $ROAM_FLAGS -I qjs/src qjs/quickjs.a -I lua/src lua/lua.a"
+OPTI_OPTS="-O3 -flto=auto"
+if [ $DUMMYGL_MODE -ne 0 ]; then
+	ALT_LIBS="" ALT_DEFS="-DDUMMY_GL" ./build.sh $DEP_OPTS $OPTI_OPTS $*
+else
+	./build.sh $BUILD_WEB_MODE $DEP_OPTS $OPTI_OPTS $*
+fi
