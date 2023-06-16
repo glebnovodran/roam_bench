@@ -1,4 +1,4 @@
-# ~ Character control benchmark ~
+# ~ Character scripting benchmark ~
 
 The project goal is to measure relative performance of different character scripting methods in a game-type scenario.
 
