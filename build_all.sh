@@ -18,6 +18,11 @@ if [ "$#" -gt 0 ]; then
 				shift
 			fi
 		;;
+		dummygl)
+			ALT_LIBS=""
+			ALT_DEFS="-DDUMMY_GL"
+			shift
+		;;
 	esac
 fi
 
