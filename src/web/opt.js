@@ -56,3 +56,15 @@ modeVal = pageParams.get("mode");
 if (modeVal !== null) {
 	Module.arguments.push("-mode:" + modeVal);
 }
+
+if (pageParams.get("noctrl") !== null) {
+	Module.arguments.push("-roamctrl_disable:1");
+}
+
+if (pageParams.get("nomood") !== null) {
+	Module.arguments.push("-mood_period:-1");
+}
+
+if (pageParams.get("moodvis") !== null) {
+	Module.arguments.push("-mood_vis:1");
+}
