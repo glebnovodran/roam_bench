@@ -58,6 +58,11 @@ Example results for all currently supported control methods:
 
 Exact values, for various platforms differ, but the ratio is more or less the same.
 
+The project can be built without graphics output: ```./build_all.sh dummygl```
+In that case character positions will be displayed as an 'overhead view' in the terminal. The statistics displayed is the same as described for the gfx mode above:
 
-You can run this benchmark inside web-browser here:
+![dummygl](https://glebnovodran.github.io/roam/dummygl_disp.png)
+<br><br>
+
+You can run the graphics version of the benchmark inside web-browser here:
 https://glebnovodran.github.io/roam/rb_web.html
