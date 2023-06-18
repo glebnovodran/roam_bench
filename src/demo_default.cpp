@@ -21,6 +21,7 @@ static bool s_moodVis = false;
 static RoamProgKind s_roamProgKind = RoamProgKind::NATIVE;
 static int s_mode = 0;
 static bool s_roamctrlDisabled = false;
+static uint64_t s_quitFrame = 0;
 
 struct CtrlExecStats {
 	double sum;
@@ -379,6 +380,8 @@ static void init() {
 	s_moodVis = nxApp::get_bool_opt("mood_vis", false);
 
 	s_ctrdtInfoEnabled = nxApp::get_bool_opt("ctrldt_info", true);
+
+	s_quitFrame = nxApp::get_int_opt("quit_frame", 0);
 }
 
 static struct ViewWk {
@@ -638,6 +641,11 @@ static void dummygl_end() {
 }
 
 static void loop(void* pLoopCtx) {
+	if (s_quitFrame != 0 && OGLSys::get_frame_count() >= s_quitFrame) {
+		OGLSys::quit();
+		return;
+	}
+
 	dummygl_begin();
 	SmpCharSys::start_frame();
 	set_scene_ctx();
