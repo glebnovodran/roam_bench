@@ -22,7 +22,7 @@ static RoamProgKind s_roamProgKind = RoamProgKind::NATIVE;
 static int s_mode = 0;
 static bool s_roamctrlDisabled = false;
 static uint64_t s_quitFrame = 0;
-static bool s_draw2dEnable = false;
+static bool s_draw2dDisable = false;
 
 struct CtrlExecStats {
 	double sum;
@@ -383,7 +383,7 @@ static void init() {
 	s_ctrdtInfoEnabled = nxApp::get_bool_opt("ctrldt_info", true);
 
 	s_quitFrame = nxApp::get_int_opt("quit_frame", 0);
-	s_draw2dEnable = !nxApp::get_bool_opt("draw_2d_disable", false);
+	s_draw2dDisable = nxApp::get_bool_opt("draw_2d_disable", false);
 }
 
 static struct ViewWk {
@@ -510,6 +510,8 @@ static void print_minimap() {
 }
 
 static void draw_2d() {
+	if (s_draw2dDisable) return;
+
 	char str[512];
 	const char* fpsStr = "FPS: ";
 	const char* exeStr = "EXE: ";
@@ -658,9 +660,7 @@ static void loop(void* pLoopCtx) {
 	profile_end();
 	Scene::frame_begin(cxColor(0.25f));
 	Scene::draw();
-	if (s_draw2dEnable) {
-		draw_2d();
-	}
+	draw_2d();
 	Scene::frame_end();
 	dummygl_end();
 }
