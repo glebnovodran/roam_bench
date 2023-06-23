@@ -57,6 +57,8 @@ static struct RoamWrenchWk {
 			mpLock = nxSys::lock_create();
 			nxCore::dbg_msg("wrench state: %p\n", mpState);
 
+			wr_loadMathLib(mpState);
+
 			register_ifc_funcs();
 			size_t srcSize = 0;
 			char* pSrc = load_wrench_prog("acts", srcSize);
