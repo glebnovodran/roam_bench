@@ -229,8 +229,7 @@ static float char_mood_calc_pint(SmpChar* pChar) {
 
 	if (pCtx && pFuncLib) {
 		Pint::interp(s_pintWk.mMoodProg.pSrc, s_pintWk.mMoodProg.srcSz, pCtx, pFuncLib);
-		Pint::Value* pMood = pCtx->var_val(pCtx->find_var("y"));
-		mood = pMood ? pMood->val.num : 0.0f;
+		mood = pCtx->get_num_val("y", 0.0);
 	}
 
 	return mood;
@@ -260,21 +259,18 @@ void roam_ctrl_pint(SmpChar* pChar) {
 
 		Pint::interp(pSrc, srcSize, pCtx, pFuncLib);
 		pCtx->print_vars();
-		Pint::Value* pNewActVal = pCtx->var_val(pCtx->find_var("newActName"));
+		Pint::Value* pNewActVal = pCtx->var_val("newActName");
 		const char* pNewActName = pNewActVal ? pNewActVal->val.pStr : "";
 		if (!nxCore::str_eq(pNewActName, "")) {
 			ActPintProg* pProg = nullptr;
 			int actId = find_pint_prog(pNewActName, &pProg);
 			if (actId >= 0) {
-				double newActDuration = 0.0;
-				Pint::Value* pDurationVal = pCtx->var_val(pCtx->find_var("newActDuration"));
-				newActDuration = pDurationVal ? pDurationVal->val.num : 0.0;
-
+				double newActDuration = pCtx->get_num_val("newActDuration", 0.0);
 				pChar->change_act(actId, newActDuration);
 			}
 		}
 
-		Pint::Value* pWTResetVal = pCtx->var_val(pCtx->find_var("wallTouchReset"));
+		Pint::Value* pWTResetVal = pCtx->var_val("wallTouchReset");
 		bool wallTouchReset = pWTResetVal ? bool(pWTResetVal->val.num) : false;
 		if (wallTouchReset) {
 			pChar->reset_wall_touch();
