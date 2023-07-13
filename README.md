@@ -18,7 +18,7 @@ These are implemented with external libraries.
 
 - [**Lua**](http://www.lua.org/) is a scripting language of choice for many game projects. Its goal to provide a performance standard to achieve.
 
-- [**wrench**](https://www.northarc.com/wrench/www/) is a recently developed embeddable scripting language. Its main purpose is to be used on embedded platforms with very limited resources. For such scenarios it seems to be on par or faster than Lua. So, it is interesting to see it in the game-programming context on different platforms.
+- [**wrench**](https://github.com/jingoro2112/wrench) is a recently developed embeddable scripting language. Its main purpose is to be used on embedded platforms with very limited resources. For such scenarios it seems to be on par or faster than Lua. So, it is interesting to see it in the game-programming context on different platforms.
 
 ## Quick compilation on Linux. ##
 
