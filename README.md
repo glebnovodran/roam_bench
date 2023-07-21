@@ -64,5 +64,5 @@ In that case character positions will be displayed as an 'overhead view' in the 
 ![dummygl](https://glebnovodran.github.io/roam/dummygl_disp.png)
 <br><br>
 
-You can run the graphics version of the benchmark inside web-browser here:
+You can run the graphics version of the benchmark inside web-browser here:<br>
 https://glebnovodran.github.io/roam/rb_web.html
