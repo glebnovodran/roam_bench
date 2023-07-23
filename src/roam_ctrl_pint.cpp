@@ -228,7 +228,6 @@ static float char_mood_calc_pint(SmpChar* pChar) {
 	float mood = 0.0f;
 
 	if (pCtx && pFuncLib) {
-		pCtx->clear_vars();
 		Pint::interp(s_pintWk.mMoodProg.pSrc, s_pintWk.mMoodProg.srcSz, pCtx, pFuncLib);
 		mood = pCtx->get_num_val("y", 0.0);
 	}
@@ -257,7 +256,7 @@ void roam_ctrl_pint(SmpChar* pChar) {
 		}
 
 		if (is_roamctrl_disabled()) return;
-		pCtx->clear_vars();
+
 		Pint::interp(pSrc, srcSize, pCtx, pFuncLib);
 		pCtx->print_vars();
 		Pint::Value* pNewActVal = pCtx->var_val("newActName");
