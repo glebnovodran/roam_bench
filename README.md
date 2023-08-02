@@ -66,3 +66,5 @@ In that case character positions will be displayed as an 'overhead view' in the 
 
 You can run the graphics version of the benchmark inside web-browser here:<br>
 https://glebnovodran.github.io/roam/rb_web.html
+
+This project uses [-=crosscore=-](https://github.com/schaban/crosscore_dev) library.
