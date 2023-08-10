@@ -33,6 +33,13 @@ Executing run.sh will display something like:
 
 By default, if launched with ```./run.sh``` , it will use 'Native' control method. To use another control method, for example Lua, use ```./run.sh -roamprog:lua```
 
+## Visual Studio / Windows. ##
+
+Download the [archive](https://glebnovodran.github.io/roam/roam_bench_vs.zip) containing project sources, dependencies (Lua, Wrench, Pint sources and GL headers; QuickJS is excluded from this archive as there are some problem with building it with VS).
+
+The archive also contains the Visual Studio solution and the project files compatible with VS 2015+. When opening the solution with the versions later than VS 2015, it might ask you to update the project - to switch to a later SDK version.
+
+## How to interpret the benchmark information. ###
 Here is how to interpret the information on the screen:
 
 1. Control type;
