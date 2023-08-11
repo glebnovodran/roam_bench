@@ -38,6 +38,8 @@ The project is designed to be used mostly under Linux or *BSD systems. However, 
 
 The Visual Studio solution and the project files from this archive are compatible with VS 2015+. When opening the solution with the versions later than VS 2015, it might ask you to update the project - to switch to a later SDK version.
 
+If you'd like to just run the benchmark under Windows, here is the archive containing a pre-compiled 64-bit executable.
+
 ## How to interpret the benchmark information. ###
 Here is how to interpret the information on the screen:
 
