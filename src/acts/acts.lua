@@ -4,11 +4,11 @@ function lerp(a, b, t)
 end
 
 function fit(val, oldMin, oldMax, newMin, newMax)
-	t = oldMax - oldMin
+	local t = oldMax - oldMin
 	if t == 0.0 then
 		return 0.0
 	end
-	rel = (val - oldMin) / t
+	local rel = (val - oldMin) / t
 	if rel < 0.0 then
 		rel = 0.0
 	end
@@ -19,26 +19,26 @@ function fit(val, oldMin, oldMax, newMin, newMax)
 end
 
 function mood()
-	t = get_mood_arg()
-	x = t * 6.2831853072
-	x2 = x*x
-	x4 = x2*x2
-	x6 = x4*x2
-	x8 = x4*x4
-	x10 = x8*x2
-	x12 = x10*x2
-	x14 = x12*x2
-	x16 = x8*x8
+	local t = get_mood_arg()
+	local x = t * 6.2831853072
+	local x2 = x*x
+	local x4 = x2*x2
+	local x6 = x4*x2
+	local x8 = x4*x4
+	local x10 = x8*x2
+	local x12 = x10*x2
+	local x14 = x12*x2
+	local x16 = x8*x8
 
-	y = 1.0 - 0.25*x2 + 0.02083333*x4 - 0.00069444*x6 + 0.0000124007936508*x8 - 0.000000137787*x10 + 0.000000001044*x12 - 0.00000000000574*x14 + 0.0000000000000239*x16
+	local y = 1.0 - 0.25*x2 + 0.02083333*x4 - 0.00069444*x6 + 0.0000124007936508*x8 - 0.000000137787*x10 + 0.000000001044*x12 - 0.00000000000574*x14 + 0.0000000000000239*x16
 
 	return y
 end
 
 function STAND()
-	newAct = ""
-	newDuration = 0.0
-	wallReset = false
+	local newAct = ""
+	local newDuration = 0.0
+	local wallReset = false
 	if check_act_timeout() then
 		if (glb_rng_next() & 0x3F) < 0xF then
 			newAct = "RUN"
@@ -54,17 +54,17 @@ function STAND()
 end
 
 function WALK()
-	newAct = ""
-	newDuration = 0.0
-	wallReset = false	
-	objTouchDT = obj_touch_duration_secs()
-	wallTouchDT = wall_touch_duration_secs()
+	local newAct = ""
+	local newDuration = 0.0
+	local wallReset = false	
+	local objTouchDT = obj_touch_duration_secs()
+	local wallTouchDT = wall_touch_duration_secs()
 	if check_act_timeout() or objTouchDT > 0.2 or wallTouchDT > 0.25 then
 		if (objTouchDT > 0) and ((glb_rng_next() & 0x3F) < 0x1F) then
 			newAct = "RETREAT"
 			newDuration = 0.5
 		else
-			t = fit(glb_rng_f01(), 0.0, 1.0, 0.5, 2.0)
+			local t = fit(glb_rng_f01(), 0.0, 1.0, 0.5, 2.0)
 			if glb_rng_next() & 1 then
 				newAct = "TURN_L"
 			else
@@ -78,11 +78,11 @@ function WALK()
 end
 
 function RUN()
-	newAct = ""
-	newDuration = 0.0
-	wallReset = false
-	objTouchDT = obj_touch_duration_secs()
-	wallTouchDT = wall_touch_duration_secs()
+	local newAct = ""
+	local newDuration = 0.0
+	local wallReset = false
+	local objTouchDT = obj_touch_duration_secs()
+	local wallTouchDT = wall_touch_duration_secs()
 	if check_act_timeout() or (objTouchDT > 0.1) or (wallTouchDT > 0.1) then
 		newAct = "STAND"
 		newDuration = 2.0
@@ -92,10 +92,10 @@ function RUN()
 end
 
 function RETREAT()
-	newAct = ""
-	newDuration = 0.0
-	wallReset = false
-	wallTouchDT = wall_touch_duration_secs()
+	local newAct = ""
+	local newDuration = 0.0
+	local wallReset = false
+	local wallTouchDT = wall_touch_duration_secs()
 	if check_act_timeout() or wallTouchDT > 0.1 then
 		newAct = "STAND"
 		newDuration = 2.0
@@ -105,9 +105,9 @@ function RETREAT()
 end
 
 function TURN_L()
-	newAct = ""
-	newDuration = 0.0
-	wallReset = false
+	local newAct = ""
+	local newDuration = 0.0
+	local wallReset = false
 	if check_act_timeout() then
 		newAct = "STAND"
 		newDuration = 1.0
@@ -117,9 +117,9 @@ function TURN_L()
 end
 
 function TURN_R()
-	newAct = ""
-	newDuration = 0.0
-	wallReset = false
+	local newAct = ""
+	local newDuration = 0.0
+	local wallReset = false
 	if check_act_timeout() then
 		newAct = "STAND"
 		newDuration = 1.0
