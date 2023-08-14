@@ -20,25 +20,20 @@ These are implemented with external libraries.
 
 - [**wrench**](https://github.com/jingoro2112/wrench) is a recently developed embeddable scripting language. Its main purpose is to be used on embedded platforms with very limited resources. For such scenarios it seems to be on par or faster than Lua. So, it is interesting to see it in the game-programming context on different platforms.
 
-## Quick compilation on Linux. ##
+## Building the project. ##
 
 Clone the project with
 <br>```git clone https://github.com/glebnovodran/roam_bench.git --depth 1```
 
 Execute ```./build_all.sh ``` . It will build the project and generate run.sh launcher script.
 
-Executing run.sh will display something like:
+For Windows and Visual Studio see [**here**](./doc/roam_windows.md).
+
+Executing ```run.sh``` will display something like:
 
 ![info](https://glebnovodran.github.io/roam/roam_info.jpg)
 
 By default, if launched with ```./run.sh``` , it will use 'Native' control method. To use another control method, for example Lua, use ```./run.sh -roamprog:lua```
-
-## Visual Studio solution archive. ##
-The project is designed to be used mostly under Linux or *BSD systems. However, if you are on Windows and want to quickly check the code under familiar Visual Studio environment, [**here**](https://glebnovodran.github.io/roam/roam_bench_vs.zip) is a self-contained archive with the VS solution, all the sources, data files and dependencies needed to build the code. But note that QJS support is currently not included in this distribution.
-
-The Visual Studio solution and the project files from this archive are compatible with VS 2015+. When opening the solution with the versions later than VS 2015, it might ask you to update the project - to switch to a later SDK version.
-
-If you'd like to just run the benchmark under Windows, [**here**](https://glebnovodran.github.io/roam/roam_bench_exe_x64.zip) is the archive containing a pre-compiled 64-bit executable.
 
 ## How to interpret the benchmark information. ###
 Here is how to interpret the information on the screen:
