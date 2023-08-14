@@ -14,7 +14,7 @@ These are based on my own code.
 
 These are implemented with external libraries.
 
-- [**QuickJS**](https://bellard.org/quickjs/) is a Javascript engine. It is easily embeddable and relatively lightweight and, as such, is a good way to test JS implemented via bytecode interpreter in an aforementioned scenario.
+- [**QuickJS**](https://bellard.org/quickjs/) is a Javascript engine. It is easily embeddable and relatively lightweight and, as such, is a good way to test JS implemented via bytecode interpreter in the aforementioned scenario.
 
 - [**Lua**](http://www.lua.org/) is a scripting language of choice for many game projects. Its goal to provide a performance standard to achieve.
 
