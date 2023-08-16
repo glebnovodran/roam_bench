@@ -407,7 +407,7 @@ if [ "$SYS_NAME" = "Darwin" ]; then
 	INCS="$INCS -I $CORE_DIR/mac"
 fi
 
-$CXX -std=c++11 -ggdb $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
+$CXX -std=c++11 -ggdb -DXD_MAIN_DEF_NWRK=0 $DEFS $INCS $SRCS -o $PROG_PATH $LIBS $*
 
 if [ -f "$PROG_PATH" ]; then
 	printf "#!/bin/sh\n\n" > $RUN_PATH
