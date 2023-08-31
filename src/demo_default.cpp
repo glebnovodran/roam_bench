@@ -113,10 +113,14 @@ static void draw_2d_ctrl_stats() {
 		case RoamProgKind::WRENCH: pCtrlProgStr = "wrench"; break;
 		default: break;
 	}
-	if (s_ctrldtAvgAvg > 0.0) {
-		XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f (%.2f) micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg, s_ctrldtAvgAvg);
+	if (Scene::get_num_active_workers() > 0) {
+		XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars, multithreaded mode", pCtrlProgStr, ctrldt.nchr);
 	} else {
-		XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg);
+		if (s_ctrldtAvgAvg > 0.0) {
+			XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f (%.2f) micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg, s_ctrldtAvgAvg);
+		} else {
+			XD_SPRINTF(XD_SPRINTF_BUF(str, sizeof(str)), "%s, %d chars: %.2f micros", pCtrlProgStr, ctrldt.nchr, s_ctrldtAvg);
+		}
 	}
 	Scene::print(sx, sy, cxColor(0.75f, 0.4f, 0.1f, 1.0f), str);
 
