@@ -3,6 +3,7 @@
 WEB_CC=0
 BUILD_WEB_MODE=""
 DUMMYGL_MODE=0
+CMN_OPTS=${CMN_OPTS-""}
 
 if [ "$#" -gt 0 ]; then
 	case $1 in
@@ -68,9 +69,9 @@ if [ ! -f lua/lua.a ]; then
 	printf "Building Lua...\n"
 	cd lua
 	if [ $WEB_CC -ne 0 ]; then
-		CC=emcc AR=emar ./lua_build.sh -O3 -flto
+		CC=emcc AR=emar ./lua_build.sh -O3 -flto $CMN_OPTS
 	else
-		./lua_build.sh -O3 -flto
+		./lua_build.sh -O3 -flto $CMN_OPTS
 	fi
 	cd ..
 fi
@@ -79,9 +80,9 @@ if [ ! -f qjs/quickjs.a ]; then
 	printf "Building QuickJS...\n"
 	cd qjs
 	if [ $WEB_CC -ne 0 ]; then
-		CC=emcc AR=emar ./qjs_build.sh -O3 -flto
+		CC=emcc AR=emar ./qjs_build.sh -O3 -flto $CMN_OPTS
 	else
-		./qjs_build.sh -O3 -flto
+		./qjs_build.sh -O3 -flto $CMN_OPTS
 	fi
 	cd ..
 fi
@@ -90,7 +91,7 @@ ROAM_FLAGS="-DROAM_WRENCH=1 -DROAM_QJS=1 -DROAM_LUA=1"
 DEP_OPTS="-I wrench/src wrench/src/wrench.cpp $ROAM_FLAGS -I qjs/src qjs/quickjs.a -I lua/src lua/lua.a"
 OPTI_OPTS="-O3 -flto=auto"
 if [ $DUMMYGL_MODE -ne 0 ]; then
-	ALT_LIBS="" ALT_DEFS="-DDUMMY_GL" ./build.sh $DEP_OPTS $OPTI_OPTS $*
+	ALT_LIBS="" ALT_DEFS="-DDUMMY_GL" ./build.sh $DEP_OPTS $OPTI_OPTS $CMN_OPTS $*
 else
-	./build.sh $BUILD_WEB_MODE $DEP_OPTS $OPTI_OPTS $*
+	./build.sh $BUILD_WEB_MODE $DEP_OPTS $OPTI_OPTS $CMN_OPTS $*
 fi
