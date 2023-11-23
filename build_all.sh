@@ -37,6 +37,9 @@ elif [ -x "`command -v wget`" ]; then
         DL_CMD="wget -O"
 fi
 
+
+# ---- get wrench
+
 WRENCH_DIR=wrench/src
 WRENCH_SRCS="wrench.h wrench.cpp"
 WRENCH_SRC_URL=https://raw.githubusercontent.com/jingoro2112/wrench/main/src
@@ -65,6 +68,48 @@ if [ $NEED_WRENCH -ne 0 ]; then
 	done
 fi
 
+
+# ---- get minion
+
+MINION_DIR=minion
+MINION_SRC_URL=https://raw.githubusercontent.com/schaban/rv_minion/main
+MINION_SRCS="minion.c minion.h minion_instrs.c minion_regs.c"
+
+NEED_MINION=0
+if [ ! -d $MINION_DIR ]; then
+	mkdir -p $MINION_DIR
+	NEED_MINION=1
+else
+	for src in $MINION_SRCS; do
+		sname=$src
+		if [ $sname = minion.c ]; then
+			sname=minion.cpp
+		fi
+		if [ $NEED_MINION -ne 1 ]; then
+			if [ ! -f $MINION_DIR/$sname ]; then
+				NEED_MINION=1
+			fi
+		fi
+	done
+fi
+
+if [ $NEED_MINION -ne 0 ]; then
+	printf "Downloading minion sources...\n"
+	for src in $MINION_SRCS; do
+		sname=$src
+		if [ $sname = minion.c ]; then
+			sname=minion.cpp
+		fi
+		if [ ! -f $MINION_DIR/$sname ]; then
+			printf "     $src - $sname\n"
+			$DL_CMD $MINION_DIR/$sname $MINION_SRC_URL/$src
+		fi
+	done
+fi
+
+
+# ---- build lua
+
 if [ ! -f lua/lua.a ]; then
 	printf "Building Lua...\n"
 	cd lua
@@ -75,6 +120,9 @@ if [ ! -f lua/lua.a ]; then
 	fi
 	cd ..
 fi
+
+
+# ---- build qjs
 
 if [ ! -f qjs/quickjs.a ]; then
 	printf "Building QuickJS...\n"
@@ -87,8 +135,11 @@ if [ ! -f qjs/quickjs.a ]; then
 	cd ..
 fi
 
-ROAM_FLAGS="-DROAM_WRENCH=1 -DROAM_QJS=1 -DROAM_LUA=1"
-DEP_OPTS="-I wrench/src wrench/src/wrench.cpp $ROAM_FLAGS -I qjs/src qjs/quickjs.a -I lua/src lua/lua.a"
+
+ROAM_FLAGS="-DROAM_WRENCH=1 -DROAM_QJS=1 -DROAM_LUA=1 -DROAM_MINION=1"
+DEP_WRENCH="-I $WRENCH_DIR $WRENCH_DIR/wrench.cpp"
+DEP_MINION="-I $MINION_DIR $MINION_DIR/minion.cpp"
+DEP_OPTS="$DEP_WRENCH $DEP_MINION $ROAM_FLAGS -I qjs/src qjs/quickjs.a -I lua/src lua/lua.a"
 OPTI_OPTS="-O3 -flto=auto"
 if [ $DUMMYGL_MODE -ne 0 ]; then
 	ALT_LIBS="" ALT_DEFS="-DDUMMY_GL" ./build.sh $DEP_OPTS $OPTI_OPTS $CMN_OPTS $*
