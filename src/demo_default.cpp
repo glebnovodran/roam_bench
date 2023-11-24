@@ -321,6 +321,8 @@ static void init() {
 			s_roamProgKind = RoamProgKind::LUA;
 		} else if (nxCore::str_eq(pRoamProgOpt, "wrench")) {
 			s_roamProgKind = RoamProgKind::WRENCH;
+		} else if (nxCore::str_eq(pRoamProgOpt, "minion")) {
+			s_roamProgKind = RoamProgKind::MINION;
 		}
 	}
 
@@ -343,6 +345,9 @@ static void init() {
 	} else if (s_roamProgKind == RoamProgKind::WRENCH) {
 		ctrlFunc = roam_ctrl_wrench;
 		init_roam_wrench();
+	} else if (s_roamProgKind == RoamProgKind::MINION) {
+		ctrlFunc = roam_ctrl_minion;
+		init_roam_minion();
 	}
 
 	init_chars(ctrlFunc);
@@ -367,6 +372,8 @@ static void init() {
 		nxCore::dbg_msg("LUA");
 	} else if (s_roamProgKind == RoamProgKind::WRENCH) {
 		nxCore::dbg_msg("WRENCH");
+	} else if (s_roamProgKind == RoamProgKind::MINION) {
+		nxCore::dbg_msg("MINION");
 	} else {
 		nxCore::dbg_msg("NATIVE");
 	}
@@ -608,12 +615,16 @@ static void profile_end() {
 static void chr_exec_init() {
 	if (s_roamProgKind == RoamProgKind::PINT) {
 		Scene::for_each_obj(chr_exec_init_pint_func, nullptr);
+	} else 	if (s_roamProgKind == RoamProgKind::MINION) {
+		Scene::for_each_obj(chr_exec_init_minion_func, nullptr);
 	}
 }
 
 static void chr_exec_reset() {
 	if (s_roamProgKind == RoamProgKind::PINT) {
 		Scene::for_each_obj(chr_exec_reset_pint_func, nullptr);
+	} else 	if (s_roamProgKind == RoamProgKind::MINION) {
+		Scene::for_each_obj(chr_exec_reset_minion_func, nullptr);
 	}
 }
 
@@ -683,6 +694,8 @@ static void reset() {
 		reset_roam_lua();
 	} else if (s_roamProgKind == RoamProgKind::WRENCH) {
 		reset_roam_wrench();
+	} else if (s_roamProgKind == RoamProgKind::MINION) {
+		reset_roam_minion();
 	}
 }
 
