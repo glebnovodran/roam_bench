@@ -74,11 +74,15 @@ static struct RoamMinionWk {
 		}
 
 		minion_bin_from_mem(mpMiBin, pRoamBin, roamBinSz);
+		Scene::unload_bin_file(pRoamBin);
 
 		MINION mi;
 		memset(&mi, 0, sizeof(mi));
 		minion_init(&mi, mpMiBin);
 		mMoodFn = minion_find_func(&mi, "char_mood_calc");
+		for (int i = 0; i < mNumActProgs; ++i) {
+			mpActProgs[i].ifn = minion_find_func(&mi, mpActProgs[i].pFuncName);
+		}
 		minion_release(&mi);
 	}
 
@@ -157,7 +161,6 @@ static float char_mood_calc_minion(SmpChar* pChar) {
 				minion_set_pc_to_func_idx(pMi, s_minion.mMoodFn);
 				exec_from_pc(pMi);
 				mood = minion_get_fa0_s(pMi);
-				minion_msg(pMi, "Mood : %.3f\n", mood);
 			}
 		}
 	}
