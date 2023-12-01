@@ -125,27 +125,24 @@ static struct RoamWrenchWk {
 
 		WRFunction* pActFunc = wr_getFunction(mpCtx, s_actProgs[nowAct].pFuncName);
 		if (pActFunc) {
-			int err = wr_callFunction(mpState, mpCtx, pActFunc, nullptr, 0);
-			if (err == WR_ERR_None) {
-				WRValue* pVal = wr_returnValueFromLastCall(mpState);
-				if (pVal) {
-					uint32_t aryLen = 0;
-					char aryType = 0;
-					WRValue* pAryVals = reinterpret_cast<WRValue*>(pVal->array(&aryLen, &aryType));
-					const char* pNewActName = pAryVals[0].c_str();
-					if (pNewActName) {
-						newAct = SmpCharSys::act_id_from_name(pNewActName);
-					}
-					newActDuration = pAryVals[1].asFloat();
-					wallTouchReset = pAryVals[2].asInt();
+			WRValue* pVal = wr_callFunction(mpCtx, pActFunc, nullptr, 0);
+			if (pVal) {
+				uint32_t aryLen = 0;
+				char aryType = 0;
+				WRValue* pAryVals = reinterpret_cast<WRValue*>(pVal->array(&aryLen, &aryType));
+				const char* pNewActName = pAryVals[0].c_str();
+				if (pNewActName) {
+					newAct = SmpCharSys::act_id_from_name(pNewActName);
+				}
+				newActDuration = pAryVals[1].asFloat();
+				wallTouchReset = pAryVals[2].asInt();
 
-					if (newAct >=0) {
-						pChar->change_act(newAct, newActDuration);
-					}
+				if (newAct >=0) {
+					pChar->change_act(newAct, newActDuration);
+				}
 
-					if (wallTouchReset) {
-						pChar->reset_wall_touch();
-					}
+				if (wallTouchReset) {
+					pChar->reset_wall_touch();
 				}
 			}
 		}
@@ -162,16 +159,12 @@ static struct RoamWrenchWk {
 		float mood = 0.0f;
 		WRFunction* pMoodFunc = wr_getFunction(mpCtx, "char_mood_calc");
 		if (pMoodFunc) {
-			int err = wr_callFunction(mpState, mpCtx, pMoodFunc, nullptr, 0);
-			if (err == WR_ERR_None) {
-				WRValue* pMoodVal = wr_returnValueFromLastCall(mpState);
-				if (pMoodVal) {
-					mood = pMoodVal->asFloat();
-				}
-			} else {
-				nxCore::dbg_msg("WRENCH: error calling char_mood_calc: %d\n", err);
+			WRValue* pMoodVal = wr_callFunction(mpState, mpCtx, pMoodFunc, nullptr, 0);
+			if (pMoodVal) {
+				mood = pMoodVal->asFloat();
 			}
 		}
+
 		return mood;
 	}
 
