@@ -64,6 +64,8 @@ FMT_OFF=${NO_FMT-"\e[0m"}
 LUA_LIB_PATH=lua/lua.a
 QJS_LIB_PATH=qjs/quickjs.a
 
+WRENCH_DIR=wrench/src
+
 WEB_CXX=""
 WEB_BUILD=0
 WEB_WASM=0
@@ -94,6 +96,11 @@ if [ "$#" -gt 0 ]; then
 			fi
 			if [ -f $QJS_LIB_PATH ]; then
 				rm -f $QJS_LIB_PATH
+			fi
+
+			if [ -d $WRENCH_DIR ]; then
+				printf "$FMT_RED$FMT_BOLD""Removing wrench sources!""$FMT_OFF\n"
+				rm -rdvf $WRENCH_DIR
 			fi
 			exit 0
 		;;
