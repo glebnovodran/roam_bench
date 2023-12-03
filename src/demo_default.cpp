@@ -111,7 +111,7 @@ static void draw_2d_ctrl_stats() {
 		case RoamProgKind::QJS: pCtrlProgStr = "QuickJS"; break;
 		case RoamProgKind::LUA: pCtrlProgStr = "Lua"; break;
 		case RoamProgKind::WRENCH: pCtrlProgStr = "wrench"; break;
-		case RoamProgKind::MINION: pCtrlProgStr = "rv_minion"; break;
+		case RoamProgKind::MINION: pCtrlProgStr = "minion"; break;
 		default: break;
 	}
 	if (Scene::get_num_active_workers() > 0) {
