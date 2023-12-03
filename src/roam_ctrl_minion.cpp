@@ -263,7 +263,6 @@ void roam_ctrl_minion(SmpChar* pChar) {
 		exec_from_pc(pMi);
 		char* pNewActName = reinterpret_cast<char*>(minion_resolve_vptr(pMi, pActInfo->vptrNewActName));
 		if (pNewActName) {
-			nxCore::dbg_msg("New act: %s\n", pNewActName);
 			int newActId = SmpCharSys::act_id_from_name(pNewActName);
 			if (newActId >= 0) {
 				pChar->change_act(newActId, pActInfo->newActDuration);
