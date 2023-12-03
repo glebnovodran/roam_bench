@@ -10,6 +10,12 @@
 #if ROAM_MINION
 #include <minion.h>
 
+typedef struct _ActInfo {
+        uint32_t vptrNewActName;
+        float newActDuration;
+        int wallTouchReset;
+} ActInfo;
+
 static struct ActMiProg {
 	const char* pFuncName;
 	int ifn;
@@ -23,7 +29,7 @@ static struct ActMiProg {
 };
 
 static void exec_from_pc(MINION* pMi) {
-	while (1) {
+	while (true) {
 		uint32_t instr = minion_fetch_pc_instr(pMi);
 		minion_instr(pMi, instr, MINION_IMODE_EXEC);
 		if (pMi->pcStatus & MINION_PCSTATUS_NATIVE) {
@@ -32,7 +38,45 @@ static void exec_from_pc(MINION* pMi) {
 	}
 }
 
-static float get_mood_arg(MINION* pMi) {
+static int mifc_check_act_timeout(MINION* pMi) {
+	int timeout = 0;
+	if (pMi) {
+		SmpChar* pChar = reinterpret_cast<SmpChar*>(pMi->pUser);
+		timeout = pChar->check_act_time_out();
+	}
+	return timeout;
+}
+
+static uint32_t mifc_glb_rng_next(MINION* pMi) {
+	uint64_t rnd = Scene::glb_rng_next();
+	rnd &= 0xffffffff;
+	return uint32_t(rnd);
+}
+
+static float mifc_glb_rng_f01(MINION* pMi) {
+	float rnd = Scene::glb_rng_f01();
+	return rnd;
+}
+
+static float mifc_wall_touch_duration_secs(MINION* pMi) {
+	float res = 0.0f;
+	if (pMi) {
+		SmpChar* pChar = reinterpret_cast<SmpChar*>(pMi->pUser);
+		res = float(pChar->get_wall_touch_duration_secs());
+	}
+	return res;
+}
+
+static float mifc_obj_touch_duration_secs(MINION* pMi) {
+	float res = 0.0f;
+	if (pMi) {
+		SmpChar* pChar = reinterpret_cast<SmpChar*>(pMi->pUser);
+		res = float(pChar->get_obj_touch_duration_secs());
+	}
+	return res;
+}
+
+static float mifc_get_mood_arg(MINION* pMi) {
 	float argVal = 0.0f;
 	if (pMi) {
 		SmpChar* pChar = reinterpret_cast<SmpChar*>(pMi->pUser);
@@ -47,8 +91,23 @@ static float get_mood_arg(MINION* pMi) {
 void roam_ecall(MINION* pMi) {
 	int fn = minion_get_a0(pMi);
 	switch (fn) {
+		case 0:
+			minion_set_a0(pMi, mifc_check_act_timeout(pMi));
+			break;
+		case 1:
+			minion_set_a0(pMi, mifc_glb_rng_next(pMi));
+			break;
+		case 2:
+			minion_set_fa0_s(pMi, mifc_glb_rng_f01(pMi));
+			break;
+		case 3:
+			minion_set_fa0_s(pMi, mifc_wall_touch_duration_secs(pMi));
+			break;
+		case 4:
+			minion_set_fa0_s(pMi, mifc_obj_touch_duration_secs(pMi));
+			break;
 		case 5:
-			minion_set_fa0_s(pMi, get_mood_arg(pMi));
+			minion_set_fa0_s(pMi, mifc_get_mood_arg(pMi));
 			break;
 	}
 }
@@ -101,15 +160,23 @@ static struct RoamMinionWk {
 				pMi->pUser = pChar;
 
 				pChar->set_ptr_wk<MINION>(0, pMi);
+
+				ActInfo* pActInfo = nxCore::tMem<ActInfo>::alloc();
+				pChar->set_ptr_wk<ActInfo>(1, pActInfo);
 			}
 		}
 	}
+
 	void reset(SmpChar* pChar) {
 		if (pChar) {
 			MINION* pMi = pChar->get_ptr_wk<MINION>(0);
 			if (pMi) {
 				minion_release(pMi);
 				nxCore::tMem<MINION>::free(pMi);
+			}
+			ActInfo* pActInfo = pChar->get_ptr_wk<ActInfo>(1);
+			if (pActInfo) {
+				nxCore::tMem<ActInfo>::free(pActInfo);
 			}
 		}
 	}
@@ -183,6 +250,31 @@ void roam_ctrl_minion(SmpChar* pChar) {
 
 	if (is_roamctrl_disabled()) return;
 
+	MINION* pMi = pChar->get_ptr_wk<MINION>(0);
 
+	size_t numActs = XD_ARY_LEN(s_actMiProgs);
+	int32_t nowAct = pChar->mAction;
+	if ((nowAct >= 0) && (nowAct < numActs)) {
+		int32_t ifn = s_actMiProgs[nowAct].ifn;
+		ActInfo* pActInfo = pChar->get_ptr_wk<ActInfo>(1);
+		uint32_t vptr = minion_mem_map(pMi, pActInfo, sizeof(ActInfo));
+		minion_set_a0(pMi, vptr);
+		minion_set_pc_to_func_idx(pMi, ifn);
+		exec_from_pc(pMi);
+		char* pNewActName = reinterpret_cast<char*>(minion_resolve_vptr(pMi, pActInfo->vptrNewActName));
+		if (pNewActName) {
+			nxCore::dbg_msg("New act: %s\n", pNewActName);
+			int newActId = SmpCharSys::act_id_from_name(pNewActName);
+			if (newActId >= 0) {
+				pChar->change_act(newActId, pActInfo->newActDuration);
+			}
+		}
+
+		if (pActInfo->wallTouchReset) {
+			pChar->reset_wall_touch();
+		}
+
+		minion_mem_unmap(pMi, vptr);
+	}
 #endif
 }
