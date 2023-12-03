@@ -101,7 +101,7 @@ void RUN(ACT_INFO* pInfo) {
 	pInfo->newActDuration = 0.0f;
 	pInfo->wallTouchReset = 0;
 
-	if (check_act_timeout() || wallTouchDT > 0.1 || objTouchDT > 0.1) {
+	if (check_act_timeout() || wallTouchDT > 0.1f || objTouchDT > 0.1f) {
 		pInfo->pNewActName = "STAND";
 		pInfo->newActDuration = 2.0f;
 	}
@@ -114,7 +114,7 @@ void RETREAT(ACT_INFO* pInfo) {
 	pInfo->newActDuration = 0.0f;
 	pInfo->wallTouchReset = 0;
 
-	if (check_act_timeout() || wallTouchDT > 0.1) {
+	if (check_act_timeout() || wallTouchDT > 0.1f) {
 		pInfo->pNewActName = "STAND";
 		pInfo->newActDuration = 2.0f;
 	}
