@@ -121,6 +121,9 @@ void RETREAT(ACT_INFO* pInfo) {
 }
 
 void TURN(ACT_INFO* pInfo) {
+	pInfo->pNewActName = NULL;
+	pInfo->newActDuration = 0.0f;
+	pInfo->wallTouchReset = 0;
 	if (check_act_timeout()) {
 		pInfo->pNewActName = "STAND";
 		pInfo->newActDuration = 1.0f;

@@ -252,7 +252,7 @@ void roam_ctrl_minion(SmpChar* pChar) {
 
 	MINION* pMi = pChar->get_ptr_wk<MINION>(0);
 
-	size_t numActs = XD_ARY_LEN(s_actMiProgs);
+	size_t numActs = s_minion.mNumActProgs;
 	int32_t nowAct = pChar->mAction;
 	if ((nowAct >= 0) && (nowAct < numActs)) {
 		int32_t ifn = s_actMiProgs[nowAct].ifn;
