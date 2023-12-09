@@ -64,8 +64,6 @@ FMT_OFF=${NO_FMT-"\e[0m"}
 LUA_LIB_PATH=lua/lua.a
 QJS_LIB_PATH=qjs/quickjs.a
 
-WRENCH_DIR=wrench/src
-
 WEB_CXX=""
 WEB_BUILD=0
 WEB_WASM=0
@@ -75,7 +73,7 @@ if [ "$#" -gt 0 ]; then
 	case $1 in
 		clean)
 			printf "$FMT_RED$FMT_BOLD""Removing temporary files!""$FMT_OFF\n"
-			for tdir in core pint inc prog tmp $SHADERS_TGT_DIR; do
+			for tdir in core pint inc prog tmp wrench minion $SHADERS_TGT_DIR; do
 				if [ -d $tdir ]; then
 					printf " * ""$FMT_BOLD""$tdir""$FMT_OFF\n"
 					rm -rf $tdir/*
@@ -98,10 +96,6 @@ if [ "$#" -gt 0 ]; then
 				rm -f $QJS_LIB_PATH
 			fi
 
-			if [ -d $WRENCH_DIR ]; then
-				printf "$FMT_RED$FMT_BOLD""Removing wrench sources!""$FMT_OFF\n"
-				rm -rdvf $WRENCH_DIR
-			fi
 			exit 0
 		;;
 		web)
