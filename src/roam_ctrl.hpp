@@ -73,8 +73,4 @@ void init_roam_minion();
 
 void reset_roam_minion();
 
-bool chr_exec_init_minion_func(ScnObj* pObj, void* pWkMem);
-
-bool chr_exec_reset_minion_func(ScnObj* pObj, void* pWkMem);
-
 void roam_ctrl_minion(SmpChar* pChar);

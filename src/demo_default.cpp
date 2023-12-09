@@ -616,16 +616,12 @@ static void profile_end() {
 static void chr_exec_init() {
 	if (s_roamProgKind == RoamProgKind::PINT) {
 		Scene::for_each_obj(chr_exec_init_pint_func, nullptr);
-	} else 	if (s_roamProgKind == RoamProgKind::MINION) {
-		Scene::for_each_obj(chr_exec_init_minion_func, nullptr);
 	}
 }
 
 static void chr_exec_reset() {
 	if (s_roamProgKind == RoamProgKind::PINT) {
 		Scene::for_each_obj(chr_exec_reset_pint_func, nullptr);
-	} else 	if (s_roamProgKind == RoamProgKind::MINION) {
-		Scene::for_each_obj(chr_exec_reset_minion_func, nullptr);
 	}
 }
 

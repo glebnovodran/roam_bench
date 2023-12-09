@@ -10,11 +10,17 @@
 #if ROAM_MINION
 #include <minion.h>
 
-typedef struct _ActInfo {
+struct ActInfo {
         uint32_t vptrNewActName;
         float newActDuration;
         int wallTouchReset;
-} ActInfo;
+};
+
+struct MinionMachine {
+  MINION minion;
+  ActInfo actInfo;
+  uint32_t vptrActInfo;
+};
 
 static struct ActMiProg {
 	const char* pFuncName;
@@ -113,10 +119,11 @@ void roam_ecall(MINION* pMi) {
 }
 
 static struct RoamMinionWk {
-	MINION_BIN* mpMiBin;
-	ActMiProg* mpActProgs;
-	size_t mNumActProgs;
-	int mMoodFn;
+	MINION_BIN* mpMiBin = { nullptr };
+	MinionMachine* mpMachines = { nullptr };
+	ActMiProg* mpActProgs { s_actMiProgs };
+	size_t mNumActProgs { XD_ARY_LEN(s_actMiProgs) };
+	int mMoodFn { -1 };
 
 	void init() {
 		mpMiBin = nxCore::tMem<MINION_BIN>::alloc();
@@ -135,77 +142,50 @@ static struct RoamMinionWk {
 		minion_bin_from_mem(mpMiBin, pRoamBin, roamBinSz);
 		Scene::unload_bin_file(pRoamBin);
 
-		MINION mi;
-		memset(&mi, 0, sizeof(mi));
-		minion_init(&mi, mpMiBin);
-		mMoodFn = minion_find_func(&mi, "char_mood_calc");
-		for (int i = 0; i < mNumActProgs; ++i) {
-			mpActProgs[i].ifn = minion_find_func(&mi, mpActProgs[i].pFuncName);
+		int numMachines = Scene::get_num_per_worker_blocks();
+		mpMachines = nxCore::tMem<MinionMachine>::alloc(numMachines);
+
+		if (mpMachines) {
+			for (int i = 0; i < numMachines; ++i) {
+				MinionMachine* pMachine = &mpMachines[i];
+				MINION* pMi = &pMachine->minion;
+				nxCore::mem_zero(pMachine, sizeof(MinionMachine));
+				minion_init(pMi, mpMiBin);
+				pMi->ecall_fn = roam_ecall;
+				pMachine->vptrActInfo = minion_mem_map(pMi, &pMachine->actInfo, sizeof(ActInfo));
+			}
 		}
-		minion_release(&mi);
+		mMoodFn = minion_bin_find_func(mpMiBin, "char_mood_calc");
+		for (int i = 0; i < mNumActProgs; ++i) {
+			mpActProgs[i].ifn = minion_bin_find_func(mpMiBin, mpActProgs[i].pFuncName);
+		}
 	}
 
 	void reset() {
-		minion_bin_free(mpMiBin);
-		nxCore::tMem<MINION_BIN>::free(mpMiBin);
-	}
-
-	void init(SmpChar* pChar) {
-		if (pChar) {
-			MINION* pMi = nxCore::tMem<MINION>::alloc();
-			if (pMi) {
-				memset(pMi, 0, sizeof(MINION));
-				minion_init(pMi, mpMiBin);
-				pMi->ecall_fn = roam_ecall;
-				pMi->pUser = pChar;
-
-				pChar->set_ptr_wk<MINION>(0, pMi);
-
-				ActInfo* pActInfo = nxCore::tMem<ActInfo>::alloc();
-				pChar->set_ptr_wk<ActInfo>(1, pActInfo);
-			}
-		}
-	}
-
-	void reset(SmpChar* pChar) {
-		if (pChar) {
-			MINION* pMi = pChar->get_ptr_wk<MINION>(0);
-			if (pMi) {
+		if (mpMachines) {
+			int numMachines = Scene::get_num_per_worker_blocks();
+			for (int i = 0; i < numMachines; ++i) {
+				MinionMachine* pMachine = &mpMachines[i];
+				MINION* pMi = &pMachine->minion;
+				minion_mem_unmap(pMi, pMachine->vptrActInfo);
 				minion_release(pMi);
-				nxCore::tMem<MINION>::free(pMi);
 			}
-			ActInfo* pActInfo = pChar->get_ptr_wk<ActInfo>(1);
-			if (pActInfo) {
-				nxCore::tMem<ActInfo>::free(pActInfo);
-			}
+			nxCore::tMem<MinionMachine>::free(mpMachines, numMachines);
+		}
+		if (mpMiBin) {
+			minion_bin_free(mpMiBin);
+			nxCore::tMem<MINION_BIN>::free(mpMiBin);
 		}
 	}
 
-} s_minion = {
-	nullptr, s_actMiProgs, XD_ARY_LEN(s_actMiProgs), -1
-};
-
-#endif
-
-bool chr_exec_init_minion_func(ScnObj* pObj, void* pWkMem) {
-#if ROAM_MINION
-	SmpChar* pChar = SmpCharSys::char_from_obj(pObj);
-	if (pChar) {
-		s_minion.init(pChar);
+	MinionMachine* get_machine(const SmpChar* pChar) {
+		int wkid = pChar->get_worker_id();
+		return wkid < 0 ? &mpMachines[0] : &mpMachines[wkid];
 	}
-#endif
-	return true;
-}
 
-bool chr_exec_reset_minion_func(ScnObj* pObj, void* pWkMem) {
-#if ROAM_MINION
-	SmpChar* pChar = SmpCharSys::char_from_obj(pObj);
-	if (pChar) {
-		s_minion.reset(pChar);
-	}
+} s_minion;
+
 #endif
-	return true;
-}
 
 void init_roam_minion() {
 #if ROAM_MINION
@@ -222,7 +202,8 @@ void reset_roam_minion() {
 static float char_mood_calc_minion(SmpChar* pChar) {
 	float mood = 0.0f;
 	if (pChar) {
-		MINION* pMi = pChar->get_ptr_wk<MINION>(0);
+		MinionMachine* pMachine = s_minion.get_machine(pChar);
+		MINION* pMi = &pMachine->minion;
 		if (pMi) {
 			if (s_minion.mMoodFn >= 0) {
 				minion_set_pc_to_func_idx(pMi, s_minion.mMoodFn);
@@ -250,30 +231,31 @@ void roam_ctrl_minion(SmpChar* pChar) {
 
 	if (is_roamctrl_disabled()) return;
 
-	MINION* pMi = pChar->get_ptr_wk<MINION>(0);
+	MinionMachine* pMachine = s_minion.get_machine(pChar);
+	if (pMachine) {
+		MINION* pMi = &pMachine->minion;
+		pMi->pUser = pChar;
+		size_t numActs = s_minion.mNumActProgs;
+		int32_t nowAct = pChar->mAction;
+		if ((nowAct >= 0) && (nowAct < numActs)) {
+			int32_t ifn = s_actMiProgs[nowAct].ifn;
+			minion_set_a0(pMi, pMachine->vptrActInfo);
+			minion_set_pc_to_func_idx(pMi, ifn);
 
-	size_t numActs = s_minion.mNumActProgs;
-	int32_t nowAct = pChar->mAction;
-	if ((nowAct >= 0) && (nowAct < numActs)) {
-		int32_t ifn = s_actMiProgs[nowAct].ifn;
-		ActInfo* pActInfo = pChar->get_ptr_wk<ActInfo>(1);
-		uint32_t vptr = minion_mem_map(pMi, pActInfo, sizeof(ActInfo));
-		minion_set_a0(pMi, vptr);
-		minion_set_pc_to_func_idx(pMi, ifn);
-		exec_from_pc(pMi);
-		char* pNewActName = reinterpret_cast<char*>(minion_resolve_vptr(pMi, pActInfo->vptrNewActName));
-		if (pNewActName) {
-			int newActId = SmpCharSys::act_id_from_name(pNewActName);
-			if (newActId >= 0) {
-				pChar->change_act(newActId, pActInfo->newActDuration);
+			exec_from_pc(pMi);
+			ActInfo* pActInfo = &pMachine->actInfo;
+			char* pNewActName = reinterpret_cast<char*>(minion_resolve_vptr(pMi, pActInfo->vptrNewActName));
+			if (pNewActName) {
+				int newActId = SmpCharSys::act_id_from_name(pNewActName);
+				if (newActId >= 0) {
+					pChar->change_act(newActId, pActInfo->newActDuration);
+				}
+			}
+
+			if (pActInfo->wallTouchReset) {
+				pChar->reset_wall_touch();
 			}
 		}
-
-		if (pActInfo->wallTouchReset) {
-			pChar->reset_wall_touch();
-		}
-
-		minion_mem_unmap(pMi, vptr);
 	}
 #endif
 }
