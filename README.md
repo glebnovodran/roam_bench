@@ -2,7 +2,7 @@
 
 The project goal is to measure relative performance of different character scripting methods in a game-type scenario.
 
-## 'Built-in' control methods.
+## 'Built-in' control methods
 
 These are based on my own code.
 
@@ -10,7 +10,7 @@ These are based on my own code.
 
 - **pint** is a simple executable S-expression form. [**pint**](https://github.com/glebnovodran/proto-plop/tree/main/pint) is very slow (though still useful for my project needs) and its goal is to provide worst case timing.
 
-## 'External' control methods.
+## 'External' control methods
 
 These are implemented with external libraries.
 
@@ -19,6 +19,10 @@ These are implemented with external libraries.
 - [**Lua**](http://www.lua.org/) is a scripting language of choice for many game projects. Its goal to provide a performance standard to achieve.
 
 - [**wrench**](https://github.com/jingoro2112/wrench) is a recently developed embeddable scripting language. Its main purpose is to be used on embedded platforms with very limited resources. For such scenarios it seems to be on par or faster than Lua. So, it is interesting to see it in the game-programming context on different platforms.
+
+## 'RISC-y' control method
+
+Character control routines are defined in [this C source](https://github.com/glebnovodran/roam_bench/blob/main/src/acts/roam.c). They are compiled to RISC-V machine code which is then executed with [**Minion**](https://github.com/schaban/rv_minion) RV32g instruction set simulator.
 
 ## Building the project. ##
 
