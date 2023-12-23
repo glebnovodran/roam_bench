@@ -8,7 +8,7 @@ LUA_OUT=lua.a
 
 LUA_VER="5.4.4"
 LUA_TAR="lua-$LUA_VER.tar.gz"
-LUA_URL="http://www.lua.org/ftp/$LUA_TAR"
+LUA_URL="https://www.lua.org/ftp/$LUA_TAR"
 LUA_CFLAGS=""
 
 DL_CMD=""
