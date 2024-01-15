@@ -159,7 +159,7 @@ static struct RoamWrenchWk {
 		float mood = 0.0f;
 		WRFunction* pMoodFunc = wr_getFunction(mpCtx, "char_mood_calc");
 		if (pMoodFunc) {
-			WRValue* pMoodVal = wr_callFunction(mpState, mpCtx, pMoodFunc, nullptr, 0);
+			WRValue* pMoodVal = wr_callFunction(mpCtx, pMoodFunc, nullptr, 0);
 			if (pMoodVal) {
 				mood = pMoodVal->asFloat();
 			}
