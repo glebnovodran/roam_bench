@@ -42,7 +42,8 @@ fi
 
 WRENCH_DIR=wrench/src
 WRENCH_SRCS="wrench.h wrench.cpp"
-WRENCH_SRC_URL=https://raw.githubusercontent.com/jingoro2112/wrench/main/src
+WRENCH_TAG=${WRENCH_TAG-"v3.0.0"}
+WRENCH_SRC_URL=https://raw.githubusercontent.com/jingoro2112/wrench/$WRENCH_TAG/src
 
 NEED_WRENCH=0
 if [ ! -d $WRENCH_DIR ]; then
