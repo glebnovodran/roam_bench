@@ -43,7 +43,8 @@ By default, if launched with ```./run.sh``` , it will use 'Native' control metho
 Here is how to interpret the information on the screen:
 
 1. Control type;
-<br>Select with ```-roamprog:{lua|qjs|wrench|pint|native}```, default is native.
+<br>Select with ```-roamprog:{lua|qjs|wrench|pint|minion|native}```, default is ```native```.
+Use ```minion``` to choose the RISC-V control code interprted with [**Minion**](https://github.com/schaban/rv_minion) as a control type.
 
 2. Number of character in scene;
 <br>This can be changed with ```-mode:{0|1|-1|-2}``` option.
