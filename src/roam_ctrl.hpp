@@ -9,6 +9,11 @@
 #ifndef ROAM_WRENCH
 #	define ROAM_WRENCH 0
 #endif
+
+#ifndef ROAM_MINION
+#       define ROAM_MINION 0
+#endif
+
 enum class RoamProgKind {
 	NATIVE,
 	PINT,

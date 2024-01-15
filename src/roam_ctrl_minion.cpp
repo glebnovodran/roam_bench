@@ -5,8 +5,6 @@
 
 #include "roam_ctrl.hpp"
 
-#define ROAM_MINION 1
-
 #if ROAM_MINION
 #include <minion.h>
 
@@ -201,6 +199,7 @@ void reset_roam_minion() {
 
 static float char_mood_calc_minion(SmpChar* pChar) {
 	float mood = 0.0f;
+#if ROAM_MINION
 	if (pChar) {
 		MinionMachine* pMachine = s_minion.get_machine(pChar);
 		MINION* pMi = &pMachine->minion;
@@ -212,6 +211,7 @@ static float char_mood_calc_minion(SmpChar* pChar) {
 			}
 		}
 	}
+#endif
 
 	return mood;
 }
