@@ -28,6 +28,10 @@ if (pageParams.get("qjs") !== null) {
 	Module.arguments.push("-roamprog:qjs");
 }
 
+if (pageParams.get("minion") !== null) {
+	Module.arguments.push("-roamprog:minion");
+}
+
 if (pageParams.get("small") !== null) {
 	Module.arguments.push("-w:480");
 	Module.arguments.push("-h:320");
