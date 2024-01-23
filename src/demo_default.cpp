@@ -694,6 +694,10 @@ static void reset() {
 	} else if (s_roamProgKind == RoamProgKind::MINION) {
 		reset_roam_minion();
 	}
+
+	if (s_draw2dDisable && s_quitFrame) {
+			nxCore::dbg_msg("avgFPS: %.2f\n", s_avgFPS.mAvg);
+	}
 }
 
 DEMO_REGISTER(default);
