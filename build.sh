@@ -5,6 +5,8 @@ BUILD_DATE="$(date)"
 SYS_NAME="`uname -s`"
 BUILD_PATH=$PWD
 
+MACOS_SYSNAME=${MACOS_SYSNAME-"Darwin"}
+
 PROG_DIR=prog
 CORE_DIR=core
 DATA_DIR=data
@@ -143,7 +145,7 @@ CORE_SRCS="crosscore.hpp crosscore.cpp demo.hpp demo.cpp draw.hpp oglsys.hpp ogl
 CORE_OGL_SRCS="gpu_defs.h progs.inc shaders.inc"
 
 CORE_MAC_SRCS=""
-if [ "$SYS_NAME" = "Darwin" ]; then
+if [ "$SYS_NAME" = $MACOS_SYSNAME ]; then
 	CORE_MAC_SRCS="mac_main.m mac_ifc.h"
 fi
 
@@ -302,7 +304,7 @@ case $SYS_NAME in
 		LIBS="$LIBS -lpthread -L/usr/local/lib"
 		DEF_CXX="clang++"
 	;;
-	Darwin)
+	$MACOS_SYSNAME)
 		DEFS=""
 		LIBS="-framework Foundation -framework Cocoa -framework OpenGL -Xlinker -w"
 		DEF_CXX="clang++"
@@ -393,7 +395,7 @@ fi
 printf "Compiling \"$FMT_BOLD$FMT_B_MAGENTA$PROG_PATH$FMT_OFF\" with $FMT_BOLD$CXX$FMT_OFF.\n"
 rm -f $PROG_PATH
 rm -f $RUN_PATH
-if [ "$SYS_NAME" = "Darwin" ]; then
+if [ "$SYS_NAME" = "$MACOS_SYSNAME" ]; then
 	if [ ! -d $TMP_DIR ]; then
 		mkdir -p $TMP_DIR
 	fi
