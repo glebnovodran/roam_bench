@@ -5,7 +5,7 @@ function lerp(a, b, t) {
 function fit(val, oldMin, oldMax, newMin, newMax) {
 	let t = oldMax - oldMin;
 	if (t == 0.0) return 0.0;
-	rel = (val - oldMin) / t;
+	let rel = (val - oldMin) / t;
 	if (rel < 0.0) rel = 0.0;
 	if (rel > 1.0) rel = 1.0;
 	return lerp(newMin, newMax, rel);
