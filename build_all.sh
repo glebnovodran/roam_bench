@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#QUICK FIX : don't build wrench code
+ROAM_WRENCH=0
+
 WEB_CC=0
 BUILD_WEB_MODE=""
 DUMMYGL_MODE=0
@@ -39,12 +42,12 @@ fi
 
 
 # ---- get wrench
-
+:'
 WRENCH_DIR=wrench/src
 WRENCH_SRCS="wrench.h wrench.cpp"
 WRENCH_TAG=${WRENCH_TAG-"v3.0.0"}
 WRENCH_SRC_URL=https://raw.githubusercontent.com/jingoro2112/wrench/$WRENCH_TAG/src
-
+print ${WRENCH_SRC_URL}
 NEED_WRENCH=0
 if [ ! -d $WRENCH_DIR ]; then
 	mkdir -p $WRENCH_DIR
@@ -68,8 +71,7 @@ if [ $NEED_WRENCH -ne 0 ]; then
 		fi
 	done
 fi
-
-
+'
 # ---- get minion
 
 MINION_DIR=minion
@@ -137,8 +139,9 @@ if [ ! -f qjs/quickjs.a ]; then
 fi
 
 
-ROAM_FLAGS="-DROAM_WRENCH=${ROAM_WRENCH-1} -DROAM_QJS=1 -DROAM_LUA=1 -DROAM_MINION=1"
-DEP_WRENCH="-I $WRENCH_DIR $WRENCH_DIR/wrench.cpp"
+#ROAM_FLAGS="-DROAM_WRENCH=${ROAM_WRENCH-1} -DROAM_QJS=1 -DROAM_LUA=1 -DROAM_MINION=1"
+#DEP_WRENCH="-I $WRENCH_DIR $WRENCH_DIR/wrench.cpp"
+DEP_WRENCH=""
 DEP_MINION="-I $MINION_DIR $MINION_DIR/minion.cpp"
 DEP_OPTS="$DEP_WRENCH $DEP_MINION $ROAM_FLAGS -I qjs/src qjs/quickjs.a -I lua/src lua/lua.a"
 OPTI_OPTS="-O3 -flto=auto"

@@ -15,6 +15,8 @@ if [ -n "$CMD_OPTS" ]; then
 fi
 echo "" >> $RES_FILE
 
+#for prog in native lua wrench qjs pint minion; do
+# WRENCH SUPPORT TEMPORARILY DISABLED
 for prog in native lua wrench qjs pint minion; do
 	$TIME_CMD -f "$prog\t: %E" -a -o $RES_FILE ./run.sh -quit_frame:$FRAMES -roamprog:$prog $CMD_OPTS
 done

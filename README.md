@@ -20,6 +20,8 @@ These are implemented with external libraries.
 
 - [**wrench**](https://github.com/jingoro2112/wrench) is a recently developed embeddable scripting language. Its main purpose is to be used on embedded platforms with very limited resources. For such scenarios it seems to be on par or faster than Lua. So, it is interesting to see it in the game-programming context on different platforms.
 
+**WRENCH SUPPORT TEMPORARILY DISABLED**
+
 ## 'RISC-y' control method
 
 Character control routines are defined in [this C source](https://github.com/glebnovodran/roam_bench/blob/main/src/acts/roam.c). They are compiled to RISC-V machine code which is then executed with [**Minion**](https://github.com/schaban/rv_minion) RV32g instruction set simulator.
