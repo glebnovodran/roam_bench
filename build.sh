@@ -312,6 +312,10 @@ case $SYS_NAME in
 	Linux)
 		LIBS="$LIBS -ldl -lpthread"
 	;;
+	CYGWIN*)
+		DEFS=""
+		LIBS="-lgdi32"
+	;;
 esac
 CXX=${CXX:-$DEF_CXX}
 

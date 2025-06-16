@@ -8,10 +8,16 @@ BUILD_WEB_MODE=""
 DUMMYGL_MODE=0
 CMN_OPTS=${CMN_OPTS-""}
 
+BUILD_CMD="./build.sh"
+if [ "`uname -o`" = "Android" ]; then
+	# HACK for Termux to process Ansi codes correctly
+	BUILD_CMD="bash ./build.sh"
+fi
+
 if [ "$#" -gt 0 ]; then
 	case $1 in
 		clean)
-			./build.sh clean
+			$BUILD_CMD clean
 			exit 0
 		;;
 		web)
@@ -42,7 +48,8 @@ fi
 
 
 # ---- get wrench
-:'
+if [ 1 -eq 0 ]; then # disabled
+
 WRENCH_DIR=wrench/src
 WRENCH_SRCS="wrench.h wrench.cpp"
 WRENCH_TAG=${WRENCH_TAG-"v3.0.0"}
@@ -71,7 +78,9 @@ if [ $NEED_WRENCH -ne 0 ]; then
 		fi
 	done
 fi
-'
+
+fi # disabled
+
 # ---- get minion
 
 MINION_DIR=minion
@@ -139,6 +148,7 @@ if [ ! -f qjs/quickjs.a ]; then
 fi
 
 
+
 #ROAM_FLAGS="-DROAM_WRENCH=${ROAM_WRENCH-1} -DROAM_QJS=1 -DROAM_LUA=1 -DROAM_MINION=1"
 #DEP_WRENCH="-I $WRENCH_DIR $WRENCH_DIR/wrench.cpp"
 ROAM_FLAGS="-DROAM_QJS=1 -DROAM_LUA=1 -DROAM_MINION=1"
@@ -147,7 +157,7 @@ DEP_MINION="-I $MINION_DIR $MINION_DIR/minion.cpp"
 DEP_OPTS="$DEP_WRENCH $DEP_MINION $ROAM_FLAGS -I qjs/src qjs/quickjs.a -I lua/src lua/lua.a"
 OPTI_OPTS="-O3 -flto=auto"
 if [ $DUMMYGL_MODE -ne 0 ]; then
-	ALT_LIBS="" ALT_DEFS="-DDUMMY_GL" ./build.sh $DEP_OPTS $OPTI_OPTS $CMN_OPTS $*
+	ALT_LIBS="" ALT_DEFS="-DDUMMY_GL" $BUILD_CMD $DEP_OPTS $OPTI_OPTS $CMN_OPTS $*
 else
-	./build.sh $BUILD_WEB_MODE $DEP_OPTS $OPTI_OPTS $CMN_OPTS $*
+	$BUILD_CMD $BUILD_WEB_MODE $DEP_OPTS $OPTI_OPTS $CMN_OPTS $*
 fi
