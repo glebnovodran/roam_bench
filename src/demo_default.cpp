@@ -719,5 +719,6 @@ bool is_roamctrl_disabled() {
 double calc_mood_arg(double nowTime) {
 	double s = nowTime / 1000.0;
 	double p = s_moodPeriod;
-	return p = nxCalc::saturate(nxCalc::div0(mth_fmod(s, p) , p));
+	p = nxCalc::saturate(nxCalc::div0(mth_fmod(s, p) , p));
+	return p;
 }
