@@ -5,6 +5,10 @@ TIME_CMD=/usr/bin/time
 FRAMES=${FRAMES-3000}
 CMD_OPTS="$*"
 
+if [ ! -x $TIME_CMD ]; then
+	TIME_CMD=@
+fi
+
 echo "# Roam Scripting Benchmark results for $FRAMES frames" > $RES_FILE
 echo "`uname -m`" >> $RES_FILE
 cat /proc/cpuinfo | grep "model name" | head -n 1 >> $RES_FILE
@@ -15,8 +19,11 @@ if [ -n "$CMD_OPTS" ]; then
 fi
 echo "" >> $RES_FILE
 
-#for prog in native lua wrench qjs pint minion; do
-# WRENCH SUPPORT TEMPORARILY DISABLED
 for prog in native lua wrench qjs pint minion; do
-	$TIME_CMD -f "$prog\t: %E" -a -o $RES_FILE ./run.sh -quit_frame:$FRAMES -roamprog:$prog $CMD_OPTS
+	if [ "$TIME_CMD" = "@" ]; then
+		printf "\n*** $prog"
+		time ./run.sh -quit_frame:$FRAMES -roamprog:$prog $CMD_OPTS >> $RES_FILE
+	else
+		$TIME_CMD -f "$prog\t: %E" -a -o $RES_FILE ./run.sh -quit_frame:$FRAMES -roamprog:$prog $CMD_OPTS
+	fi
 done
