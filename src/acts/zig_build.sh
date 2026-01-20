@@ -9,7 +9,8 @@ _READELF_=llvm-readelf
 mkdir -p $OUT_DIR
 
 
-zig build-exe -target riscv32-freestanding -mcpu=baseline_rv32-c -ODebug roam.zig -femit-bin=$OUT_DIR/roam.elf -T roam.ld $*
+zig build-exe -target riscv32-freestanding -mcpu=baseline_rv32-c -mcpu=generic_rv32+m+d -ODebug roam.zig -femit-bin=$OUT_DIR/roam.elf -T roam.ld $*
+
 $_OBJCOPY_ -O binary $OUT_DIR/roam.elf $OUT_DIR/roam.bin
 $_OBJDUMP_ -d $OUT_DIR/roam.elf > $OUT_DIR/roam.txt
 $_READELF_ -s -S --wide $OUT_DIR/roam.elf | tail -n +5 > $OUT_DIR/roam.info
