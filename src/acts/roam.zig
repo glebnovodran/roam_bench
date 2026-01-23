@@ -63,9 +63,11 @@ const ActInfo = struct {
 };
 
 export fn STAND(pInfo: *ActInfo) void {
-	pInfo.pNewActName = null;
-	pInfo.newActDuration = 0.0;
-	pInfo.wallTouchReset = 0;
+	pInfo.* = ActInfo {
+		.pNewActName = null,
+		.newActDuration = 0.0,
+		.wallTouchReset = 0
+	};
 
 	if (check_act_timeout() != 0) {
 		if ((glb_rng_next() & 0x3F) < 0xF) {
@@ -82,9 +84,11 @@ export fn STAND(pInfo: *ActInfo) void {
 export fn WALK(pInfo: *ActInfo) void {
 	const objTouchDT = obj_touch_duration_secs();
 	const wallTouchDT = wall_touch_duration_secs();
-	pInfo.pNewActName = null;
-	pInfo.newActDuration = 0.0;
-	pInfo.wallTouchReset = 0;
+	pInfo.* = ActInfo {
+		.pNewActName = null,
+		.newActDuration = 0.0,
+		.wallTouchReset = 0
+	};
 
 	if (check_act_timeout() != 0 or objTouchDT > 0.2 or wallTouchDT > 0.25) {
 		if (objTouchDT > 0.0 and ((glb_rng_next() & 0x3F) < 0x1F)) {
@@ -105,9 +109,11 @@ export fn WALK(pInfo: *ActInfo) void {
 export fn RUN(pInfo: *ActInfo) void {
 	const objTouchDT = obj_touch_duration_secs();
 	const wallTouchDT = wall_touch_duration_secs();
-	pInfo.pNewActName = null;
-	pInfo.newActDuration = 0.0;
-	pInfo.wallTouchReset = 0;
+	pInfo.* = ActInfo {
+		.pNewActName = null,
+		.newActDuration = 0.0,
+		.wallTouchReset = 0
+	};
 
 	if (check_act_timeout() != 0 or wallTouchDT > 0.1 or objTouchDT > 0.1) {
 		pInfo.pNewActName = @ptrCast("STAND");
@@ -117,9 +123,11 @@ export fn RUN(pInfo: *ActInfo) void {
 
 export fn RETREAT(pInfo: *ActInfo) void {
 	const wallTouchDT = wall_touch_duration_secs();
-	pInfo.pNewActName = null;
-	pInfo.newActDuration = 0.0;
-	pInfo.wallTouchReset = 0;
+	pInfo.* = ActInfo {
+		.pNewActName = null,
+		.newActDuration = 0.0,
+		.wallTouchReset = 0
+	};
 
 	if (check_act_timeout() != 0 or wallTouchDT > 0.1) {
 		pInfo.pNewActName = @ptrCast("STAND");
@@ -128,9 +136,12 @@ export fn RETREAT(pInfo: *ActInfo) void {
 }
 
 export fn TURN(pInfo: *ActInfo) void {
-	pInfo.pNewActName = null;
-	pInfo.newActDuration = 0.0;
-	pInfo.wallTouchReset = 0;
+	pInfo.* = ActInfo {
+		.pNewActName = null,
+		.newActDuration = 0.0,
+		.wallTouchReset = 0
+	};
+
 	if (check_act_timeout() != 0) {
 		pInfo.pNewActName = @ptrCast("STAND");
 		pInfo.newActDuration = 1.0;
