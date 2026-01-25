@@ -6,12 +6,12 @@ inline fn sysCall(no: usize) void {
 	);
 }
 
-export fn _check_act_timeout() void { sysCall(0); }
-export fn _glb_rng_next() void { sysCall(1); }
-export fn _glb_rng_f01() void { sysCall(2); }
-export fn _wall_touch_duration_secs() void { sysCall(3); }
-export fn _obj_touch_duration_secs() void { sysCall(4); }
-export fn _get_mood_arg() void { sysCall(5); }
+fn _check_act_timeout() void { sysCall(0); }
+fn _glb_rng_next() void { sysCall(1); }
+fn _glb_rng_f01() void { sysCall(2); }
+fn _wall_touch_duration_secs() void { sysCall(3); }
+fn _obj_touch_duration_secs() void { sysCall(4); }
+fn _get_mood_arg() void { sysCall(5); }
 
 const check_act_timeout: *const fn() i32 = @ptrCast(&_check_act_timeout);
 const glb_rng_next: *const fn() u32 = @ptrCast(&_glb_rng_next);
