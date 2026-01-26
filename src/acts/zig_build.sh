@@ -9,6 +9,7 @@ _READELF_=llvm-readelf
 
 mkdir -p $OUT_DIR
 
+echo "Compiling with zig $($ZIG version)"
 $ZIG build-exe -target riscv32-freestanding -mcpu=generic_rv32+m+d -OReleaseSafe roam.zig -femit-bin=$OUT_DIR/roam.elf -T roam.ld $*
 
 $_OBJCOPY_ -O binary $OUT_DIR/roam.elf $OUT_DIR/roam.bin
