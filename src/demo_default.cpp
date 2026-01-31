@@ -574,7 +574,9 @@ static void draw_2d() {
 	}
 
 	if (OGLSys::is_dummy()) {
+		nxCore::dbg_msg("\x1B[?25l");
 		print_minimap();
+		nxCore::dbg_msg("\x1B[?25h");
 		nxCore::dbg_msg("\x1B[G[\x1B[1m\x1B[42m\x1B[93m %s", str);
 	}
 
