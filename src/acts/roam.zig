@@ -1,24 +1,34 @@
-inline fn sysCall(no: usize) void {
-	asm volatile (
+inline fn sysCallI32(no: usize) i32 {
+	return asm volatile (
 		"ecall"
-		:
+		: [ret] "={a0}" (-> i32),
 		: [number] "{a0}" (no)
 	);
 }
 
-fn _check_act_timeout() void { sysCall(0); }
-fn _glb_rng_next() void { sysCall(1); }
-fn _glb_rng_f01() void { sysCall(2); }
-fn _wall_touch_duration_secs() void { sysCall(3); }
-fn _obj_touch_duration_secs() void { sysCall(4); }
-fn _get_mood_arg() void { sysCall(5); }
+inline fn sysCallU32(no: usize) u32 {
+	return asm volatile (
+		"ecall"
+		: [ret] "={a0}" (-> u32),
+		: [number] "{a0}" (no)
+	);
+}
 
-const check_act_timeout: *const fn() i32 = @ptrCast(&_check_act_timeout);
-const glb_rng_next: *const fn() u32 = @ptrCast(&_glb_rng_next);
-const glb_rng_f01: *const fn() f32 = @ptrCast(&_glb_rng_f01);
-const wall_touch_duration_secs: *const fn() f32 = @ptrCast(&_wall_touch_duration_secs);
-const obj_touch_duration_secs: *const fn() f32 = @ptrCast(&_obj_touch_duration_secs);
-const get_mood_arg: *const fn() f32 = @ptrCast(&_get_mood_arg);
+inline fn sysCallF32(no: usize) f32 {
+	return asm volatile (
+		"ecall"
+		: [ret] "={fa0}" (-> f32),
+		: [number] "{a0}" (no)
+	);
+}
+
+fn check_act_timeout() i32 { return sysCallI32(0); }
+fn glb_rng_next() u32 { return sysCallU32(1); }
+fn glb_rng_f01() f32 { return sysCallF32(2); }
+fn wall_touch_duration_secs() f32 { return sysCallF32(3); }
+fn obj_touch_duration_secs() f32 { return sysCallF32(4); }
+fn get_mood_arg() f32 { return sysCallF32(5); }
+
 
 export fn char_mood_calc() f32 {
 	const t = get_mood_arg();
