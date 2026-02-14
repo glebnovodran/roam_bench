@@ -1,6 +1,6 @@
 #!/bin/sh
 
-OUT_DIR=${OUT_DIR:-out}
+OUT_DIR=${OUT_DIR:-out_zig}
 
 ZIG=${ZIG:-zig}
 _OBJCOPY_=llvm-objcopy
