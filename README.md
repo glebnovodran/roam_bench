@@ -26,6 +26,8 @@ These are implemented with external libraries.
 
 Character control routines are defined in [this C source](https://github.com/glebnovodran/roam_bench/blob/main/src/acts/roam.c). They are compiled to RISC-V machine code which is then executed with [**Minion**](https://github.com/schaban/rv_minion) RV32g instruction set simulator.
 
+UPDATE: I have added the control routines definitions in [Zig](https://github.com/glebnovodran/roam_bench/blob/main/src/acts/roam.zig) and [Rust](https://github.com/glebnovodran/roam_bench/blob/main/src/acts/roam.rs). They also can be compiled into the RISC-V machine code to be executed with [**Minion**](https://github.com/schaban/rv_minion)
+
 ## Building the project. ##
 
 Clone the project with
